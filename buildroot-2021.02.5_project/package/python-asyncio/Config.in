@@ -1,0 +1,6 @@
+config BR2_PACKAGE_PYTHON_ASYNCIO
+	bool "python-asyncio"
+	help
+	  reference implementation of PEP 3156.
+
+	  http://www.python.org/dev/peps/pep-3156/

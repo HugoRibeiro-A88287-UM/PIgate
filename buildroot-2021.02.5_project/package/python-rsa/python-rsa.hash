@@ -1,0 +1,5 @@
+# md5, sha256 from https://pypi.org/pypi/rsa/json
+md5  edb224f927cf8f53ff530ab04d092c69  rsa-4.8.tar.gz
+sha256  5c6bd9dc7a543b7fe4304a631f8a8a3b674e2bbfc49c2ae96200cdbe55df6b17  rsa-4.8.tar.gz
+# Locally computed sha256 checksums
+sha256  073f28b7d389c8fe74f607e17c27f81eaa5ace69edc43a884f23f41b41c5c726  LICENSE

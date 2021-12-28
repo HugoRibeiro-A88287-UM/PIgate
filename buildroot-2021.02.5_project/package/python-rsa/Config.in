@@ -1,0 +1,7 @@
+config BR2_PACKAGE_PYTHON_RSA
+	bool "python-rsa"
+	select BR2_PACKAGE_PYTHON_PYASN1 # runtime
+	help
+	  Pure-Python RSA implementation.
+
+	  https://stuvel.eu/rsa
