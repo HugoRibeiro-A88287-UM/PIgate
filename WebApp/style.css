@@ -79,6 +79,22 @@ footer a{
 	top:1px;
 }
 
+.goBackButton{
+	box-shadow:inset -1px -1px 0px 0px #cf866c;
+	background-color:#e64c25;
+	border:1px solid #942911;
+	display:inline-block;
+	cursor:pointer;
+	color:#ffffff;
+	font-family:Arial;
+	font-size:18px;
+	padding:13px 30px;
+	text-decoration:none;
+    margin-right: 30px;
+    border-radius: 5px;
+    transform: rotate(180deg);
+}
+
 input{
     font-family: Verdana, Geneva, Tahoma, sans-serif;
     text-align: left;
