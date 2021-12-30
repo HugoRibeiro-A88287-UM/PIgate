@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PIgate: Gate Options Page</title>
+    <link rel="shortcut icon" href="/Images/raspberry-pi-icon-17.ico">
+
+    <link rel="stylesheet" href="/style.css">
+
+</head>
+
+<body>
+
+    <div class="container">
+
+        <header>
+            <img src="/Images/PI_gate_logo.png" alt="PIgate Logo"
+                width= 400px
+                height= 220px>
+
+        </header>
+
+        <main>
+            <h1>Gate Options</h1>
+
+            <div>
+                <button onclick= " document.location= '#' " class="defaultButton" style="width: 185px; margin-bottom: 30px; margin-right: 100px;" > Open Gate </button>
+                <button onclick= " document.location= '/LoginSuccess/GateOptions/RenameGate.html' " class="defaultButton" style="width: 185px;"> Rename Gate </button>
+            </div>
+
+            <div>
+                <button onclick= " document.location= '/LoginSuccess/GateOptions/AddPlate.html' " class="defaultButton" style="width: 185px; margin-bottom: 30px; margin-right: 100px;"> Add Plate </button>
+                <button onclick= " document.location= '/LoginSuccess/GateOptions/RemovePlate.html' " class="defaultButton" style="width: 185px; margin-bottom: 30px;"> Remove Plate </button>
+            </div>
+
+            <div>
+                <button onclick= " document.location= '/LoginSuccess/GateOptions/Whitelist.html' " class="defaultButton" style="width: 185px; margin-right: 100px;"> Show Whitelist </button>
+                <button onclick= " document.location= '/LoginSuccess/GateOptions/Entries.html' " class="defaultButton" style="width: 185px; margin-bottom: 30px;"> Show Entries </button>
+            </div>
+
+            <div>
+                <button onclick= " document.location= '/LoginSuccess/Gate.html' " class="goBackButton" > &#10140 </button>
+            </div>
+
+        </main>
+
+        <footer>
+
+            <p>Disclaimer: This is a university project.</p>
+
+            <a href="https://www.uminho.pt/PT" target="_blank"> UMinho Website</a>
+            
+            <a href="mailto:PIgate.project@gmail.com?Subject=WebApp_Help"> Any Problem? Contact us </a>
+
+        </footer>
+
+    </div>
+
+</body>
+
+</html>

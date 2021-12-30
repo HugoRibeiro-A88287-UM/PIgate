@@ -17,18 +17,14 @@ footer{
     text-align: center;
 }
 
+main{
+    text-align: center;
+}
+
 nav{
     text-align: center;
     padding-top: 20px;
     padding-bottom: 20px;
-}
-
-nav a{
-    text-align: center;
-    text-decoration: none;
-    font-size: 30px;
-    padding-left: 10px;
-    padding-right: 10px;
 }
 
 h1{
@@ -69,14 +65,8 @@ footer a{
 	padding:13px 30px;
 	text-decoration:none;
     margin-right: 30px;
+    margin-bottom: 20px;
     border-radius: 5px;
-}
-.defaultButton:hover {
-	background-color:#bc3315;
-}
-.defaultButton:active {
-	position:relative;
-	top:1px;
 }
 
 .goBackButton{
@@ -95,6 +85,14 @@ footer a{
     transform: rotate(180deg);
 }
 
+.defaultButton:hover , .goBackButton:hover {
+	background-color:#bc3315;
+}
+.defaultButton:active , .goBackButton:active {
+	position:relative;
+	top:1px;
+}
+
 input{
     font-family: Verdana, Geneva, Tahoma, sans-serif;
     text-align: left;
@@ -110,4 +108,5 @@ input{
     margin-bottom: 30px;
     
 }
+
 
