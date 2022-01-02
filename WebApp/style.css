@@ -110,4 +110,12 @@ input{
     
 }
 
+.reportMsg {
+    font-family: Verdana, Geneva, Tahoma, sans-serif;
+    font-size: small;
+    color: black;
+    color: rgb(228, 58, 58);
+    padding-top: 0px;
+}
+
 

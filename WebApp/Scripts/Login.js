@@ -19,32 +19,80 @@ const app = initializeApp(firebaseConfig);
 
 const auth = getAuth();
 
+/* REPORT MESSAGE FUNCTION */
+const red = 0;
+const green = 1;
+
+function sendReportMsg(msg,color){
+
+    const msgReport = document.getElementById("msgReport");
+
+    switch(color)
+    {
+        case green:
+            msgReport.style.color = "rgb(5, 104, 5)";
+            break;
+        
+        case red:
+            msgReport.style.color = "rgb(228, 58, 5)";
+            break;
+
+        default:
+            msgReport.style.color = "black";
+            break;
+    }
+
+    msgReport.innerText = msg ;
+}
+
+/* REPORT MESSAGE FUNCTION */
+
+
+/* VERIFY LOGIN DELAY*/
+let delayInMilliseconds = 900;
+//Set a 900 mseconds delay so the auth can update
+setTimeout(function() {
+
+    if(auth.currentUser == null)
+    {
+        console.log("User is not logged in");
+        //window.location.href = "/Login.html";
+    }
+    else
+    {
+        console.log("User is logged in");
+        window.location.href = "/LoginSuccess/Gate.html";
+
+    }
+
+  }, delayInMilliseconds);
+
+/* VERIFY LOGIN DELAY*/
+
+
+// DELETE THIS
 console.log(auth);
-if(auth.currentUser == null)
-{
-    console.log("User is not logged in");
-}
-else
-{
-    console.log("User is logged in");
-    //window.location.href = "/LoginSuccess/Gate.html";
-}
-
-
+//
+//
 document.getElementById("loginButton").onclick = function(){
 
-    var userEmail = document.getElementById("email").value;
-    var userPass = document.getElementById("password").value;
+    let userEmail = document.getElementById("email").value;
+    let userPass = document.getElementById("password").value;
+
+    if(userEmail === "" || userPass === "" )
+    {
+        sendReportMsg("You must fill all the fields", red);
+        return;
+    }
 
     setPersistence(auth, browserSessionPersistence)
         .then(() => {
-
-            console.log("OK");
 
             signInWithEmailAndPassword(auth, userEmail, userPass)
             .then((userCredential) => {
                 const user = userCredential.user;
           
+                sendReportMsg("Login Success", green);
                 window.location.href = "/LoginSuccess/Gate.html";
           
               })
@@ -55,11 +103,11 @@ document.getElementById("loginButton").onclick = function(){
                 switch (errorCode)
                 {
                     case "auth/wrong-password": 
-                        window.alert("Invalid Password");
+                        sendReportMsg("Invalid Password", red);
                         break;
                     
                     default:
-                        window.alert("Invalid Email/Password");
+                        sendReportMsg("Invalid Email/Password",red);
                         break;
                 }
         })
@@ -68,7 +116,7 @@ document.getElementById("loginButton").onclick = function(){
             const errorCode = error.code;
             const errorMessage = error.message;
 
-            console.log("Erro in persistence")
+            errorReport.innerText = "Technical Error! Please try later or contact us!";
 
         });
       

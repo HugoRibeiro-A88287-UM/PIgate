@@ -17,12 +17,14 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const auth = getAuth();
-let delayInMilliseconds = 700;
 
 //Delete in future
 console.log(auth);
 
-//Set a 700 mseconds delay so the auth can update
+/* VERIFY LOGIN DELAY*/
+
+let delayInMilliseconds = 900;
+//Set a 900 mseconds delay so the auth can update
 setTimeout(function() {
 
     if(auth.currentUser == null)
@@ -52,7 +54,7 @@ setTimeout(function() {
 
   }, delayInMilliseconds);
 
-
+/* VERIFY LOGIN DELAY*/
 
 
 
