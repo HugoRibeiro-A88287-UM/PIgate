@@ -17,8 +17,8 @@
 
         <header>
             <img src="Images/PI_gate_logo.png" alt="PIgate Logo"
-                width= 400px
-                height= 220px>
+                width= "400px"
+                height= "220px">
 
         </header>
 
@@ -26,15 +26,15 @@
             <h1>Login</h1>
 
             <div>
-                <input type="email" placeholder="Email">
-                <input type="password" placeholder="Password">
+                <input type="email" placeholder="Email" id="email">
+                <input type="password" placeholder="Password" id="password">
             </div>
 
         </main>
 
         <nav>
-            <button onclick= " document.location= 'LoginSuccess/Gate.html' " class="defaultButton"> Login </button>
-            <button onclick= " document.location= 'Register.html' " class="defaultButton"> Register </button>
+            <button class="defaultButton" id="loginButton"> Login </button>
+            <button onclick= " document.location= 'Register.html' " class="defaultButton" id="registerButton"> Register </button>
         </nav>
 
 
@@ -47,7 +47,10 @@
         </footer>
 
     </div>
-
+    
+   
+    <script type="module" src="/Scripts/Login.js"></script>
+    
 </body>
 
 </html>
