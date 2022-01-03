@@ -17,8 +17,8 @@
 
         <header>
             <img src="/Images/PI_gate_logo.png" alt="PIgate Logo"
-                width= 400px
-                height= 220px>
+                width= "400px"
+                height= "220px">
 
         </header>
 
@@ -26,15 +26,19 @@
             <h1>Remove PIgate</h1>
 
             <div>
-                <input type="text" placeholder="PIgate_ID">
-                <input type="password" placeholder="Password">
+                <input type="text" placeholder="PIgate_ID*" id="PIgate_ID">
+                <input type="password" placeholder="Password*" id="password">
+            </div>
+
+            <div>
+                <p id="msgReport" class="reportMsg"></p>
             </div>
 
         </main>
 
         <nav>
             <button onclick= " document.location= '/LoginSuccess/Gate.html' " class="goBackButton" > &#10140 </button>
-            <button onclick= " document.location= '#' " class="defaultButton" style="width: 150px;"> Remove </button>
+            <button class="defaultButton" style="width: 150px;" id="removeButton"> Remove </button>
         </nav>
 
 
@@ -47,6 +51,8 @@
         </footer>
 
     </div>
+
+    <script src="/Scripts/RemoveGate.js" type="module"></script>
 
 </body>
 

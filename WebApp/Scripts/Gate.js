@@ -11,7 +11,7 @@ const firebaseConfig = {
     storageBucket: "pigate-175f8.appspot.com",
     messagingSenderId: "1027851390443",
     appId: "1:1027851390443:web:50ee2a5f98c75d2a879dae"
-  };
+};
 
 
 // Initialize Firebase
