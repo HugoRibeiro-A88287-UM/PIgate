@@ -1,4 +1,5 @@
 body{
+    visibility: hidden;
     background-color: rgb(66, 64, 64);
     color:rgb(219, 210, 210);
 }
@@ -118,4 +119,29 @@ input{
     padding-top: 0px;
 }
 
+.vertical-menu {
+    width: 300px;
+    margin-left: auto;
+    margin-right: auto; 
+    height: 200px;
+    overflow-y: auto;
+    margin-bottom: 60px;
+  }
+  
+  .vertical-menu a {
+    background-color: #eee; 
+    color: black; 
+    display: block;
+    padding: 20px; 
+    text-decoration: none; 
+  }
+  
+  .vertical-menu a:hover {
+    background-color: #ccc; /* Dark grey background on mouse-over */
+  }
+  
+  .vertical-menu a.active {
+    background-color: #04AA6D; /* Add a green color to the "active/current" link */
+    color: white;
+  }
 

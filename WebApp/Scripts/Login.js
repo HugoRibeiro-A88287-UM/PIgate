@@ -1,3 +1,4 @@
+// Initialize 
 import {initializeApp } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js';
 
 import {getAuth, setPersistence, signInWithEmailAndPassword, browserSessionPersistence  } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js'
@@ -13,11 +14,12 @@ const firebaseConfig = {
     appId: "1:1027851390443:web:50ee2a5f98c75d2a879dae"
   };
 
-
-// Initialize Firebase
 const app = initializeApp(firebaseConfig);
 
 const auth = getAuth();
+document.body.style.visibility="visible";
+// --------- End initialization ----------- //
+
 
 /* REPORT MESSAGE FUNCTION */
 const red = 0;
@@ -56,7 +58,7 @@ setTimeout(function() {
     if(auth.currentUser == null)
     {
         console.log("User is not logged in");
-        //window.location.href = "/Login.html";
+
     }
     else
     {

@@ -1,7 +1,6 @@
+// Initialize 
 import {initializeApp } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js';
-
 import {getAuth} from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js';
-
 import { getDatabase, ref, set, child, get,push } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js';
 
 const firebaseConfig = {
@@ -19,6 +18,7 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth();
 const database = getDatabase();
+// --------- End initialization ----------- //
 
 /* VERIFY LOGIN DELAY*/
 
@@ -34,6 +34,7 @@ setTimeout(function() {
     else
     {
         console.log("User is logged in");
+        document.body.style.visibility="visible";
 
     }
 
@@ -84,6 +85,8 @@ document.getElementById("addGate").onclick = function () {
         return;
     }
 
+    //Verify if the PIgate Exists
+
     let dbRef = ref(getDatabase());
 
     get(child(dbRef, `Gate/`)).then((snapshot) => {
@@ -102,6 +105,8 @@ document.getElementById("addGate").onclick = function () {
             throw("Error: Invalid Password")
 
 
+        //Verify if the user has already added to PIgate
+
         get(child(dbRef,'Gate_Reg/')).then((snapshot) => {
 
             let equal = 0;
@@ -114,6 +119,11 @@ document.getElementById("addGate").onclick = function () {
             if(equal)
                 throw("Error: PIgate already added");
             
+            //After all verifications, the PIgate is associated with the user account
+
+            if(gateName === "")
+                gateName = "Unnamed PIgate";
+
             push(ref(database, 'Gate_Reg/'), {
                 PIgate_ID: userPIgate_ID,
                 email: auth.currentUser.email,

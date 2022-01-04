@@ -1,7 +1,6 @@
+// Initialize 
 import {initializeApp } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js';
-
 import {getAuth} from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js';
-
 import { getDatabase, ref, remove, child, get, onValue } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js';
 
 const firebaseConfig = {
@@ -14,11 +13,11 @@ const firebaseConfig = {
     appId: "1:1027851390443:web:50ee2a5f98c75d2a879dae"
 };
 
-
-// Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const auth = getAuth();
 const database = getDatabase();
+// --------- End initialization ----------- //
+
 
 /* VERIFY LOGIN DELAY*/
 
@@ -34,7 +33,7 @@ setTimeout(function() {
     else
     {
         console.log("User is logged in");
-
+        document.body.style.visibility="visible";
     }
 
   }, delayInMilliseconds);
@@ -102,33 +101,35 @@ document.getElementById("removeButton").onclick = function () {
             throw("Error: Invalid Password")
 
 
-    // Verify if the user has the PIgate        
+        // Verify if the user has the PIgate        
 
         let found = false;
-        const dbRefGateReg = ref(database,'Gate_Reg/');
+        
+        get(child(dbRef,'Gate_Reg/')).then((snapshot) => {
 
-        onValue(dbRefGateReg, (snapshot) => {
-            snapshot.forEach((childSnapshot) => {
-                const childKey = childSnapshot.key;
-                const childData = childSnapshot.val();
+            let buffer = snapshot.val();
 
-                if( childData.PIgate_ID == userPIgate_ID && childData.email == auth.currentUser.email )
+            for(let index in buffer){
+                if( buffer[index].PIgate_ID == userPIgate_ID && buffer[index].email == auth.currentUser.email )
                 {
                     found = true;
-                    remove( ref(database,`Gate_Reg/${childKey}`));
-                    console.log("removing");
+                    remove( ref(database,`Gate_Reg/${index}`));
+                    console.log("Removing");
                 }
+            }
 
-            });
-          }, {
-            onlyOnce: true
-          });
-
-        if(!found)
-            throw("Error: No PIgate to remove");
+            if(!found)
+                throw("Error: No PIgate to remove");
+    
+    
+            sendReportMsg("Success: PIgate Removed ",green);
 
 
-        sendReportMsg("Success: PIgate Removed ",green);
+        }).catch((error) => 
+        {
+            console.error(error);
+            sendReportMsg(error,red);
+        });
 
     }).catch((error) => {
         sendReportMsg(error,red);

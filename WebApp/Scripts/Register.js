@@ -1,6 +1,5 @@
-// Initialize Firebase
+// Initialize 
 import {initializeApp } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js';
-
 import {getAuth, createUserWithEmailAndPassword, updateProfile, signOut} from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js'
 
 const firebaseConfig = {
@@ -17,7 +16,7 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth();
-
+document.body.style.visibility="visible";
 // --------- End initialization ----------- //
 
 /* REPORT MESSAGE FUNCTION */
