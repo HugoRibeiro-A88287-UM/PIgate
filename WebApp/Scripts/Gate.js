@@ -16,6 +16,7 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth();
 const database = getDatabase();
+const dbRefGateReg = ref(database,'Gate_Reg/');
 
 //Delete in future
 console.log(auth);
@@ -52,8 +53,6 @@ setTimeout(function() {
 
 
         //Get the user PIgates and display
-        const dbRefGateReg = ref(database,'Gate_Reg/');
-
         onValue(dbRefGateReg, (snapshot) => {
             snapshot.forEach((childSnapshot) => {
                 const childKey = childSnapshot.key;

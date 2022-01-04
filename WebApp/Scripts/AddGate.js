@@ -18,6 +18,7 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth();
 const database = getDatabase();
+const dbRef = ref(database);
 // --------- End initialization ----------- //
 
 /* VERIFY LOGIN DELAY*/
@@ -86,8 +87,6 @@ document.getElementById("addGate").onclick = function () {
     }
 
     //Verify if the PIgate Exists
-
-    let dbRef = ref(getDatabase());
 
     get(child(dbRef, `Gate/`)).then((snapshot) => {
 

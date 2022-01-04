@@ -16,9 +16,7 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth();
 const database = getDatabase();
-
-//Delete in future
-console.log(auth);
+let dbRef = ref(database);
 // --------- End initialization ----------- //
 
 /* GET URL PARAMETER FUNCTION */
@@ -54,8 +52,6 @@ setTimeout(function() {
         console.log("User is logged in");
    
         //Verify if the user is valid for the Gate_Reg Id
-        let dbRef = ref(database);
-
         get(child(dbRef, `Gate_Reg/${gateRegId}`)).then((snapshot) => {
             const obj = snapshot.val();
 
@@ -87,5 +83,14 @@ document.getElementById("isToOpenButton").onclick = function() {
     update(ref(database, `Gate/${gateRegInfo.PIgate_ID}`), {
         isToOpen: 1
         });
+
+        //implement entry
+
+}
+
+
+document.getElementById("addPlateButton").onclick = function() {
+
+    window.location.href = `/LoginSuccess/GateOptions/AddPlate.html?id=${gateRegId}`;
 
 }

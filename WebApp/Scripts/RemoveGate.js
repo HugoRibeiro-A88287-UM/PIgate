@@ -16,6 +16,7 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth();
 const database = getDatabase();
+const dbRef = ref(database);
 // --------- End initialization ----------- //
 
 
@@ -81,10 +82,7 @@ document.getElementById("removeButton").onclick = function () {
         return;
     }
 
-    //Verify if the PIgate Exists
-
-    const dbRef = ref(getDatabase());
-       
+    //Verify if the PIgate Exists      
     get(child(dbRef, `Gate/`)).then((snapshot) => {
 
         let equal = 0;

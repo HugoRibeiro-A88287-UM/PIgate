@@ -145,3 +145,7 @@ input{
     color: white;
   }
 
+.completeInputPlate{
+    visibility: hidden;
+    margin-bottom: -200px;
+}
