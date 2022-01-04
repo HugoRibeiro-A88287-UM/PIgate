@@ -65,7 +65,7 @@ setTimeout(function() {
                     let textNode = document.createTextNode(`${childData.description}`);
 
                     node.appendChild(textNode);
-                    node.href = "/LoginSuccess/AddGate.html";
+                    node.href = `/LoginSuccess/GateOptions/OptionsMenu.html?id=${childKey}`;
                     document.getElementById("PIgateList").appendChild(node);
                 }
 
@@ -73,8 +73,6 @@ setTimeout(function() {
           }, {
             onlyOnce: true
           });
-
-          //Get a way to link the pigate id para o gate menu
 
         document.body.style.visibility="visible";
     }
