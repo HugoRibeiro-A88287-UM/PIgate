@@ -18,9 +18,6 @@ const auth = getAuth();
 const database = getDatabase();
 const dbRef = ref(database);
 
-//Controls if it is the first time that the user trying to add a plate
-let firstTime = true;
-
 // --------- End initialization ----------- //
 
 /* GET URL PARAMETER FUNCTION */
@@ -117,22 +114,15 @@ document.getElementById("goBackButton").onclick = function() {
 }
 
 
-document.getElementById("addButton").onclick = function() {
+document.getElementById("removeButton").onclick = function () {
 
     let licensePlate = document.getElementById("licensePlateId").value;
-    let description = document.getElementById("descriptionId").value;
-    let brand = document.getElementById("brandId").value;
-    let model = document.getElementById("modelId").value;
-    let color = document.getElementById("colorId").value;
-    
 
-
-    if(licensePlate === "" || description === "" )
+    if(licensePlate === "" )
     {
         sendReportMsg("You must fill all the required fields", red);
         return;
     }
-
 
     // Verify Plate format. The available formats are
     //     AA-00-00
@@ -150,85 +140,27 @@ document.getElementById("addButton").onclick = function() {
         return;
     }
 
-    get(child(dbRef, `Car/`)).then((snapshot) => {
+    get(child(dbRef, `Car_Reg/`)).then((snapshot) => {
 
-        let equal = 0;
+        let found = false;
         let buffer = snapshot.val();
 
-        //Verify if the Car exists on the databse
+        //Verify if the PIgate has the inserted plate
         for(let index in buffer){
-            equal += 1 && ( buffer[index].Plate == licensePlate );
-        }
 
-        if(!equal && firstTime)
-        {
-            firstTime = false;
-            document.getElementById("licensePlateId").readOnly = "true";
-            document.getElementById("completeInput").style.marginBottom = "auto";
-            document.getElementById("completeInput").style.visibility = "visible";
-            throw("For a better experience, please insert the following fields");
-        }
-            
-
-       //Verify if the user has already added to PLate
-        get(child(dbRef,'Car_Reg/')).then((snapshot) => {
-
-            let equal = 0;
-            let buffer = snapshot.val();
-
-            for(let index in buffer){
-                equal += 1 && ( buffer[index].PIgate_ID == gateRegInfo.PIgate_ID && buffer[index].Plate == licensePlate );
-            }
-
-            if(equal)
-                throw("Error: Plate already added");
-            
-            //After all verifications, the PIgate is associated with Plate
-           
-            if(firstTime)
+            if( buffer[index].PIgate_ID == gateRegInfo.PIgate_ID && buffer[index].Plate == licensePlate)
             {
-                //The Car is in the system
-                push(ref(database, 'Car_Reg/'), {
-                    PIgate_ID: gateRegInfo.PIgate_ID,
-                    Plate: licensePlate,
-                    description: description 
-                    });
+                found = true;
+                remove( ref(database,`Car_Reg/${index}`));
+                console.log("Removing");
+
             }
-            else
-            {   //The Car is not in the system
+        }
 
-                if(brand === "")
-                    brand = "Not Availabe";
-
-                if(model === "")
-                    model = "Not Availabe";
-
-                if(color === "")
-                    color = "Not Availabe";
+        if(!found)
+            throw("Error: No Plate to Remove");
                 
-                set(ref(database, `Car/${licensePlate}`), {
-                    Plate: licensePlate,
-                    Colour: color,
-                    Brand: brand,
-                    Model: model
-                    });
-                
-                push(ref(database, 'Car_Reg/'), {
-                    PIgate_ID: gateRegInfo.PIgate_ID,
-                    Plate: licensePlate,
-                    description: description 
-                    });
-            }
-
-            sendReportMsg("Success: PIgate Added ",green);
-
-            setTimeout( () => {location.reload();}, 1000);
-
-        }).catch((error) => 
-        {
-            console.error(error);
-            sendReportMsg(error,red);
-        });
+        sendReportMsg("Success: PIgate Removed ",green);
 
     }).catch((error) => {
         sendReportMsg(error,red);
@@ -238,23 +170,13 @@ document.getElementById("addButton").onclick = function() {
 
 }
 
-
 //This functions triggers when the enter key is pressed
-document.getElementById("descriptionId").addEventListener("keyup", function(event) {
+document.getElementById("licensePlateId").addEventListener("keyup", function(event) {
     event.preventDefault();
 
     //Enter Key = 13
     if (event.keyCode === 13) {
-        document.getElementById("addButton").click();
-    }
-});
-
-document.getElementById("colorId").addEventListener("keyup", function(event) {
-    event.preventDefault();
-
-    //Enter Key = 13
-    if (event.keyCode === 13) {
-        document.getElementById("addButton").click();
+        document.getElementById("removeButton").click();
     }
 });
 

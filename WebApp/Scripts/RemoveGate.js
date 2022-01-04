@@ -136,3 +136,13 @@ document.getElementById("removeButton").onclick = function () {
     });
 
 }
+
+//This functions triggers when the enter key is pressed
+document.getElementById("password").addEventListener("keyup", function(event) {
+    event.preventDefault();
+
+    //Enter Key = 13
+    if (event.keyCode === 13) {
+        document.getElementById("removeButton").click();
+    }
+});

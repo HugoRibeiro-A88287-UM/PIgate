@@ -94,3 +94,9 @@ document.getElementById("addPlateButton").onclick = function() {
     window.location.href = `/LoginSuccess/GateOptions/AddPlate.html?id=${gateRegId}`;
 
 }
+
+document.getElementById("removePlateButton").onclick = function() {
+
+    window.location.href = `/LoginSuccess/GateOptions/RemovePlate.html?id=${gateRegId}`;
+
+}

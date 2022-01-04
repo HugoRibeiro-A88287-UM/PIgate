@@ -111,3 +111,13 @@ document.getElementById("registerButton").onclick = function() {
 
     return 1;
 }
+
+//This functions triggers when the enter key is pressed
+document.getElementById("username").addEventListener("keyup", function(event) {
+    event.preventDefault();
+
+    //Enter Key = 13
+    if (event.keyCode === 13) {
+        document.getElementById("registerButton").click();
+    }
+});
