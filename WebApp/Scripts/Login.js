@@ -1,6 +1,5 @@
 // Initialize 
 import {initializeApp } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js';
-
 import {getAuth, setPersistence, signInWithEmailAndPassword, browserSessionPersistence  } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js'
 
 
@@ -72,10 +71,6 @@ setTimeout(function() {
 /* VERIFY LOGIN DELAY*/
 
 
-// DELETE THIS
-console.log(auth);
-//
-//
 document.getElementById("loginButton").onclick = function(){
 
     let userEmail = document.getElementById("email").value;

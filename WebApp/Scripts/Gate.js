@@ -18,8 +18,6 @@ const auth = getAuth();
 const database = getDatabase();
 const dbRefGateReg = ref(database,'Gate_Reg/');
 
-//Delete in future
-console.log(auth);
 // --------- End initialization ----------- //
 
 /* VERIFY LOGIN DELAY*/
