@@ -106,3 +106,9 @@ document.getElementById("renameButton").onclick = function() {
     window.location.href = `/LoginSuccess/GateOptions/RenameGate.html?id=${gateRegId}`;
 
 }
+
+document.getElementById("whitelistButton").onclick = function() {
+
+    window.location.href = `/LoginSuccess/GateOptions/Whitelist.html?id=${gateRegId}`;
+
+}

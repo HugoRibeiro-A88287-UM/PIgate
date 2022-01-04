@@ -17,22 +17,23 @@
 
         <header>
             <img src="/Images/PI_gate_logo.png" alt="PIgate Logo"
-                width= 400px
-                height= 220px>
+                width= "400px"
+                height= "220px">
 
         </header>
 
         <main>
             <h1>Whitelist PIgate</h1>
 
-            <div>
-                <!-- List with whitelist plates -->
-            </div>
+            <div id="whitelist" class="vertical-menu">
+                <a class="active">Whitelist Plates</a>
+                <a> </a>
+            </div> 
 
         </main>
 
         <nav>
-            <button onclick= " document.location= '/LoginSuccess/GateOptions/OptionsMenu.html' " class="goBackButton" > &#10140 </button>
+            <button id="goBackButton" class="goBackButton" > &#10140 </button>
         </nav>
 
 
@@ -45,6 +46,8 @@
         </footer>
 
     </div>
+
+    <script type="module" src="/Scripts/Whitelist.js"></script>
 
 </body>
 

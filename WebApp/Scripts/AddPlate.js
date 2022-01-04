@@ -191,7 +191,7 @@ document.getElementById("addButton").onclick = function() {
                 push(ref(database, 'Car_Reg/'), {
                     PIgate_ID: gateRegInfo.PIgate_ID,
                     Plate: licensePlate,
-                    description: description 
+                    Description: description 
                     });
             }
             else
@@ -216,7 +216,7 @@ document.getElementById("addButton").onclick = function() {
                 push(ref(database, 'Car_Reg/'), {
                     PIgate_ID: gateRegInfo.PIgate_ID,
                     Plate: licensePlate,
-                    description: description 
+                    Description: description 
                     });
             }
 
