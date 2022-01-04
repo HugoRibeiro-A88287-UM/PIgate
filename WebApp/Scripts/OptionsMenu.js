@@ -1,7 +1,7 @@
 // Initialize 
 import {initializeApp } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js';
 import {getAuth, signOut } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js'
-import { getDatabase, ref, remove, child, get, onValue } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js';
+import { getDatabase, ref, remove, child, get, update } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js';
 
 const firebaseConfig = {
     apiKey: "AIzaSyB8Dzaeb7D3_QhrrD4gcDuqiSfYmesyIbw",
@@ -34,7 +34,7 @@ function getParameterByName(name, url) {
 }
 
 const gateRegId = getParameterByName("id");
-
+let gateRegInfo = null;
 /* GET URL PARAMETER FUNCTION */
 
 
@@ -62,6 +62,7 @@ setTimeout(function() {
             if(obj.email == auth.currentUser.email)
             {
                 document.body.style.visibility="visible";
+                gateRegInfo = obj;
                 console.log("Valid user");
             }
             else
@@ -81,22 +82,10 @@ setTimeout(function() {
 
 
 
-// document.getElementById("logoutButton").onclick = function() {
+document.getElementById("isToOpenButton").onclick = function() {
 
-//     let number;
+    update(ref(database, `Gate/${gateRegInfo.PIgate_ID}`), {
+        isToOpen: 1
+        });
 
-//     const auth = getAuth();
-//     signOut(auth).then(() => {
-
-//         number = 0;
-//         window.alert("Logout Success");
-//         window.location.href = "/Login.html";
-        
-//     }).catch((error) => {
-        
-//         number++;
-//         console.log(number);
-//         window.alert("Logout Error! Try again")
-
-//     });
-// }
+}
