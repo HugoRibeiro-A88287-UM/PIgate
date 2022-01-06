@@ -73,7 +73,7 @@ setTimeout(function() {
 
                     if( childData.PIgate_ID == gateRegInfo.PIgate_ID)
                     {
-                        let dbRefCarReg = ref(database,`Car_Reg/${childData.Plate}|${childData.PIgate_ID}/Description`);
+                        const dbRefCarReg = ref(database,`Car_Reg/${childData.Plate}|${childData.PIgate_ID}/Description`);
 
                         onValue(dbRefCarReg, (snapshot) => {
 
@@ -98,19 +98,30 @@ setTimeout(function() {
                                 nodeDetail[2].appendChild(document.createTextNode(`Date  : ${childData.Date}`));
                                 nodeDetail[3].appendChild(document.createTextNode(`Time  : ${childData.Time}`));
 
-                                let dbRefCarReg = ref(database,`Car/${childData.Plate}`);
+                                const dbRefCar = ref(database,`Car/${childData.Plate}`);
+                                                              
+                                if(dbRefCar.key ==  "Not Available")
+                                {
+                                    for(let i = 0; i < detailLength -3 ; i++)
+                                        document.getElementById("entriesDetail").appendChild(nodeDetail[i]);
 
-                                onValue(dbRefCarReg, (snapshot) => {
-                                    nodeDetail[4].appendChild(document.createTextNode(`Brand : ${snapshot.val().Brand}`));
-                                    nodeDetail[5].appendChild(document.createTextNode(`Model : ${snapshot.val().Model}`));
-                                    nodeDetail[6].appendChild(document.createTextNode(`Colour: ${snapshot.val().Colour}`));
-                                }, { onlyOnce: true });
+                                    document.getElementById("entriesDetail").style.marginBottom = "100px";    
+                                }
+                                else
+                                {
+                                    onValue(dbRefCar, (snapshot) => {
+                                        nodeDetail[4].appendChild(document.createTextNode(`Brand : ${snapshot.val().Brand}`));
+                                        nodeDetail[5].appendChild(document.createTextNode(`Model : ${snapshot.val().Model}`));
+                                        nodeDetail[6].appendChild(document.createTextNode(`Colour: ${snapshot.val().Colour}`));
+                                    }, { onlyOnce: true });
+    
+                                    for(let i = 0; i < detailLength ; i++)
+                                        document.getElementById("entriesDetail").appendChild(nodeDetail[i]);  
 
-                                for(let i = 0; i < detailLength ; i++)
-                                    document.getElementById("entriesDetail").appendChild(nodeDetail[i]);  
-                                
+                                    document.getElementById("entriesDetail").style.marginBottom = "250px";
+                                }
+                              
                                 document.getElementById("Title").classList.add("active");
-                                document.getElementById("entriesDetail").style.marginBottom = "250px";
                                 document.getElementById("entriesDetail").style.visibility = "visible";
 
                                 console.log("Detail entry done");

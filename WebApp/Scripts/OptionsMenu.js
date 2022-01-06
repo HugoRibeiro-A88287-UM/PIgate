@@ -1,7 +1,7 @@
 // Initialize 
 import {initializeApp } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js';
 import {getAuth, signOut } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js'
-import { getDatabase, ref, remove, child, get, update } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js';
+import { getDatabase, ref, remove, child, get, update, push,set  } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js';
 
 const firebaseConfig = {
     apiKey: "AIzaSyB8Dzaeb7D3_QhrrD4gcDuqiSfYmesyIbw",
@@ -84,7 +84,22 @@ document.getElementById("isToOpenButton").onclick = function() {
         isToOpen: 1
         });
 
-        //implement entry
+    const date = new Date();
+
+    //Push the entry to database
+    //Add an not available Car_Reg to have a better
+    //  experience in entries section.
+
+    push(ref(database, `Entry/`), {
+        PIgate_ID: gateRegInfo.PIgate_ID,
+        Date: date.toDateString(),
+        Time: `${date.getHours()}:${date.getMinutes()}`,
+        Plate: "Not Available"
+    });
+
+    set(ref(database, `Car_Reg/Not Available|${gateRegInfo.PIgate_ID}`), {
+        Description: "Opened By Open Now"
+    });
 
 }
 
