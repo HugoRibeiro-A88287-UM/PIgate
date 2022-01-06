@@ -22,7 +22,7 @@ void initFirebase(void)
 
         if( (int)PyLong_AsLong(presult) == EINVAL )
         {
-            printf("Acess Error");
+            printf("Access Error");
             Py_XDECREF(pDict);
             Py_XDECREF(pFuncInit);
             Py_XDECREF(presult);
@@ -161,6 +161,55 @@ void ReceivePlates(void)
     Py_XDECREF(encodedString);
 }
 
+void isToOpen(void)
+{
+    PyObject *pFunc,*presult;
+    PyObject *presultString, *encodedString;
+    int presult_length;
+
+    pFunc = PyDict_GetItemString(pDict, (char*)"checkIsToOpen");
+
+
+    if (PyCallable_Check(pFunc))
+    {
+        const char* aux = "1";
+
+        presult = PyObject_CallFunction(pFunc,"s", aux);
+
+        if( (int)PyLong_AsLong(presult) == EINVAL )
+        {
+            printf("Error in checkIsToOpen \n");
+            Py_XDECREF(pDict);
+            Py_XDECREF(pFunc);
+            Py_XDECREF(presult);
+            Py_Finalize();
+            exit(-1);
+        }
+
+        printf(" \n The isToOpen Variavel is:  %d \n ", (int)PyLong_AsLong(presult));
+
+    }
+     else 
+     {
+        PyErr_Print();
+        Py_XDECREF(pDict);
+        Py_XDECREF(pFunc);
+        Py_XDECREF(presult);
+        Py_Finalize();
+        exit(-1);
+    }
+
+
+
+    //Cleanup
+    
+    Py_XDECREF(pFunc);
+    Py_XDECREF(presult);
+    Py_XDECREF(presultString);
+    Py_XDECREF(encodedString);
+
+}
+
 int main()
 {
 
@@ -189,9 +238,10 @@ int main()
     Py_XDECREF(pName);
     Py_XDECREF(pModule);
     
-    initFirebase();
-    sendEntry();
-    ReceivePlates();
+    //initFirebase();
+    //sendEntry();
+    //ReceivePlates();
+    isToOpen();
 
     //Cleanup
     Py_XDECREF(pDict);

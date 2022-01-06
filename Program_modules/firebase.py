@@ -14,24 +14,6 @@ config = {
 
 firebase = pyrebase.initialize_app(config)
 db = firebase.database()
-auth = firebase.auth()
-
-#login
-def initFirebase():
-
-    email = "PIgate.project@gmail.com"
-    password = "PIgate"
-
-    try:
-        auth.sign_in_with_email_and_password(email,password)
-        print("Login Success")
-        return 1
-
-    except:
-        print("Bad Login")
-        return errno.EINVAL
-
-
 
 def sendEntry(PIgate_ID, Plate, Time, Date):
 
@@ -61,7 +43,37 @@ def getPlates():
     for plates in plates.each():
         plate_array.append(plates.key())
 
-    print(plate_array)
-
     return plate_array
 
+
+def checkIsToOpen(PIgate_ID):
+
+    reference = "Gate/" + PIgate_ID + "/isToOpen"
+
+    try:
+        gates = db.child(reference).get()
+    except:
+        return errno.EINVAL
+
+    if(gates.val() == 0):
+
+        return gates.val()
+    
+    else:
+        
+        try:
+            db.child(reference).set(0)
+        except:
+            return errno.EINVAL
+
+        return gates.val()
+    
+
+
+            
+    
+
+
+
+
+    
