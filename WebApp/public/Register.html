@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PIgate: Register Page</title>
+    <link rel="shortcut icon" href="/Images/raspberry-pi-icon-17.ico">
+
+    <link rel="stylesheet" href="/style.css">
+
+</head>
+
+<body>
+
+    <div class="container">
+
+        <header>
+            <img src="Images/PI_gate_logo.png" alt="PIgate Logo"
+                width= "400px"
+                height= "220px">
+
+        </header>
+
+        <main>
+            <h1>Register</h1>
+
+            <div>
+                <input type="email" placeholder="Email*" id="email">
+                <input type="password" placeholder="Password*" id="password">
+                <input type="text" placeholder="Username*" id="username">
+                <!-- <input type="number" placeholder="Phone" id="phone"> -->
+            </div>
+
+            <div>
+                <p id="msgReport" class="reportMsg"></p>
+            </div>
+
+        </main>
+
+        <nav>
+            <button onclick= " document.location= 'Login.html' " class="goBackButton"> &#10140 </button>
+            <button class="defaultButton" id="registerButton"> Register </button>
+        </nav>
+
+
+        <footer>
+
+            <a href="https://www.uminho.pt/PT" target="_blank" rel="noopener noreferrer"> UMinho Website</a>
+            
+            <a href="mailto:PIgate.project@gmail.com?Subject=WebApp_Help"> Any Problem? Contact us </a>
+
+        </footer>
+
+    </div>
+
+    <script type="module" src="/Scripts/Register.js"></script>
+
+</body>
+
+</html>

@@ -113,7 +113,7 @@ document.getElementById("loginButton").onclick = function(){
             const errorCode = error.code;
             const errorMessage = error.message;
 
-            errorReport.innerText = "Technical Error! Please try later or contact us!";
+            sendReportMsg("Technical Error! Please try later or contact us!",red);
 
         });
       
