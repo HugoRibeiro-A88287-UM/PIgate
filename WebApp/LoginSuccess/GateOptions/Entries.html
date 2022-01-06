@@ -17,34 +17,46 @@
 
         <header>
             <img src="/Images/PI_gate_logo.png" alt="PIgate Logo"
-                width= 400px
-                height= 220px>
+                width= "400px"
+                height= "220px">
 
         </header>
 
         <main>
             <h1>Entries PIgate</h1>
+            
+            <div id="entries" class="vertical-menu" style="width: 350px;">
+                <a class="active">Entries History</a>
+                <a> </a>
 
-            <div>
-                <!-- List with the entries -->
-            </div>
+                <!-- Entries History list -->
+                
+            </div> 
+
+            <div id="entriesDetail" class="entry-detail-display">
+
+                <!-- Entry Detail list  -->
+
+            </div> 
 
         </main>
 
         <nav>
-            <button onclick= " document.location= '/LoginSuccess/GateOptions/OptionsMenu.html' " class="goBackButton" > &#10140 </button>
+            <button id="goBackButton" class="goBackButton" > &#10140 </button>
         </nav>
 
 
         <footer>
 
-            <a href="https://www.uminho.pt/PT" target="_blank"> UMinho Website</a>
+            <a href="https://www.uminho.pt/PT" target="_blank"  rel="noopener noreferrer"> UMinho Website</a>
             
-            <a href="mailto:PIgate.project@gmail.com?Subject=WebApp_Help"> Any Problem? Contact us </a>
+            <a href="mailto:PIgate.project@gmail.com?Subject=WebApp_Help" target="_blank" rel="noopener noreferrer"> Any Problem? Contact us </a>
 
         </footer>
 
     </div>
+
+    <script type="module" src="/Scripts/Entries.js"></script>
 
 </body>
 

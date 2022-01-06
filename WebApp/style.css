@@ -119,33 +119,52 @@ input{
     padding-top: 0px;
 }
 
-.vertical-menu {
-    width: 300px;
+.entry-detail-display
+{
+    width: 350px;
     margin-left: auto;
     margin-right: auto; 
     height: 200px;
-    overflow-y: auto;
-    margin-bottom: 60px;
-  }
-  
-  .vertical-menu a {
-    background-color: #eee; 
-    color: black; 
-    display: block;
-    padding: 20px; 
-    text-decoration: none; 
-  }
-  
-  .vertical-menu a:hover {
-    background-color: #ccc; /* Dark grey background on mouse-over */
-  }
-  
-  .vertical-menu a.active {
-    background-color: #04AA6D;
-    color: white;
-  }
+    margin-bottom: -250px;
+    visibility: hidden;
+}
+
+.vertical-menu {
+width: 300px;
+margin-left: auto;
+margin-right: auto; 
+height: 200px;
+overflow-y: auto;
+margin-bottom: 60px;
+}
+
+.vertical-menu a {
+background-color: #eee; 
+color: black; 
+display: block;
+padding: 20px; 
+text-decoration: none; 
+}
+
+.entry-detail-display a {
+background-color: #eee; 
+color: black; 
+display: block;
+padding: 20px; 
+text-decoration: none; 
+
+}
+.vertical-menu a:hover, .entry-detail-display a:hover {
+background-color: #ccc; 
+}
+
+.vertical-menu a.active, .entry-detail-display a.active {
+background-color: #04AA6D;
+color: white;
+}
+
 
 .completeInputPlate{
-    visibility: hidden;
-    margin-bottom: -200px;
+visibility: hidden;
+margin-bottom: -200px;
 }

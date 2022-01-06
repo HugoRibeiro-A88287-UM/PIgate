@@ -54,7 +54,6 @@ setTimeout(function() {
         console.log("User is logged in");
    
         //Verify if the user is valid for the Gate_Reg Id
-        let dbRef = ref(database);
 
         get(child(dbRef, `Gate_Reg/${gateRegId}`)).then((snapshot) => {
             const obj = snapshot.val();

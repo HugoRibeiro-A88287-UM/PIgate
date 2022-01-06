@@ -111,4 +111,11 @@ document.getElementById("whitelistButton").onclick = function() {
 
     window.location.href = `/LoginSuccess/GateOptions/Whitelist.html?id=${gateRegId}`;
 
+    
+}
+
+document.getElementById("entriesButton").onclick = function() {
+
+    window.location.href = `/LoginSuccess/GateOptions/Entries.html?id=${gateRegId}`;
+
 }

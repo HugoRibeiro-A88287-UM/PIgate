@@ -92,7 +92,7 @@ function sendReportMsg(msg,color){
     switch(color)
     {
         case green:
-            msgReport.style.color = "rgb(5, 104, 5)";
+            msgReport.style.color = "rgb(80, 247, 94);";
             break;
         
         case red:
@@ -188,7 +188,7 @@ document.getElementById("addButton").onclick = function() {
             if(firstTime)
             {
                 //The Car is in the system
-                push(ref(database, 'Car_Reg/'), {
+                set(ref(database, `Car_Reg/${licensePlate}|${gateRegInfo.PIgate_ID}`), {
                     PIgate_ID: gateRegInfo.PIgate_ID,
                     Plate: licensePlate,
                     Description: description 
@@ -213,7 +213,7 @@ document.getElementById("addButton").onclick = function() {
                     Model: model
                     });
                 
-                push(ref(database, 'Car_Reg/'), {
+                set(ref(database, `Car_Reg/${licensePlate}|${gateRegInfo.PIgate_ID}`), {
                     PIgate_ID: gateRegInfo.PIgate_ID,
                     Plate: licensePlate,
                     Description: description 
@@ -222,7 +222,7 @@ document.getElementById("addButton").onclick = function() {
 
             sendReportMsg("Success: PIgate Added ",green);
 
-            setTimeout( () => {location.reload();}, 1000);
+            setTimeout( () => {location.reload();}, 1500);
 
         }).catch((error) => 
         {

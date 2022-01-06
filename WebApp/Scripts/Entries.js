@@ -17,8 +17,8 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth();
 const database = getDatabase();
 const dbRef = ref(database);
-const dbRefEntries = ref(database,'Entries/');
-const dbRefCarReg = ref(database,'Car_Reg/');
+const dbRefEntries = ref(database,'Entry/');
+const detailLength = 7; //Number of detail lables
 
 // --------- End initialization ----------- //
 
@@ -35,7 +35,9 @@ function getParameterByName(name, url) {
 }
 
 const gateRegId = getParameterByName("id");
+const gateEntry = getParameterByName("entry");
 let gateRegInfo = null; //Gate_Reg object {PIgate_Id, email}
+
 /* GET URL PARAMETER FUNCTION */
 
 
@@ -53,9 +55,9 @@ setTimeout(function() {
     else
     {
         console.log("User is logged in");
+        
    
         //Verify if the user is valid for the Gate_Reg Id
-        let dbRef = ref(database);
 
         get(child(dbRef, `Gate_Reg/${gateRegId}`)).then((snapshot) => {
             const obj = snapshot.val();
@@ -63,25 +65,66 @@ setTimeout(function() {
             if(obj.email != auth.currentUser.email)
                 throw("Invalid User");
 
-            //Get the user whitelist and display
-            onValue(dbRefCarReg, (snapshot) => {
+            //Get the user entries and display
+            onValue(dbRefEntries, (snapshot) => {
                 snapshot.forEach((childSnapshot) => {
                     const childKey = childSnapshot.key;
                     const childData = childSnapshot.val();
 
                     if( childData.PIgate_ID == gateRegInfo.PIgate_ID)
                     {
-                        let node = document.createElement("a");
-                        let textNode = document.createTextNode(`${childData.Plate} | ${childData.Description}`);
+                        let dbRefCarReg = ref(database,`Car_Reg/${childData.Plate}|${childData.PIgate_ID}/Description`);
 
-                        node.appendChild(textNode);
-                        document.getElementById("whitelist").appendChild(node);
+                        onValue(dbRefCarReg, (snapshot) => {
+
+                            let node = [document.createElement("a")];
+
+                            node[0].appendChild(document.createTextNode(`${childData.Plate} | ${childData.Date} | ${snapshot.val()}`));
+                            node[0].href = `/LoginSuccess/GateOptions/Entries.html?id=${gateRegId}&entry=${childKey}`;
+                            document.getElementById("entries").appendChild(node[0]);          
+
+                            //If the receive entry matches with the one the the PIgate has
+                            if(gateEntry == childKey)
+                            {
+                                //Genrate the list with detail
+                                let nodeDetail = [];
+
+                                for(let i = 0; i < detailLength ; i++)
+                                    nodeDetail.push(document.createElement("a"));
+                                
+                                nodeDetail[0].appendChild(document.createTextNode(`${snapshot.val()}`));
+                                nodeDetail[0].id = "Title"
+                                nodeDetail[1].appendChild(document.createTextNode(`Plate : ${childData.Plate}`));
+                                nodeDetail[2].appendChild(document.createTextNode(`Date  : ${childData.Date}`));
+                                nodeDetail[3].appendChild(document.createTextNode(`Time  : ${childData.Time}`));
+
+                                let dbRefCarReg = ref(database,`Car/${childData.Plate}`);
+
+                                onValue(dbRefCarReg, (snapshot) => {
+                                    nodeDetail[4].appendChild(document.createTextNode(`Brand : ${snapshot.val().Brand}`));
+                                    nodeDetail[5].appendChild(document.createTextNode(`Model : ${snapshot.val().Model}`));
+                                    nodeDetail[6].appendChild(document.createTextNode(`Colour: ${snapshot.val().Colour}`));
+                                }, { onlyOnce: true });
+
+                                for(let i = 0; i < detailLength ; i++)
+                                    document.getElementById("entriesDetail").appendChild(nodeDetail[i]);  
+                                
+                                document.getElementById("Title").classList.add("active");
+                                document.getElementById("entriesDetail").style.marginBottom = "250px";
+                                document.getElementById("entriesDetail").style.visibility = "visible";
+
+                                console.log("Detail entry done");
+
+                            }
+
+                        }, { onlyOnce: true });
                     }
-
                 });
-            }, {
-                onlyOnce: true
-            });
+            }, { onlyOnce: true });
+
+
+            //Check if a detail entry was requested
+
 
             document.body.style.visibility="visible";
             gateRegInfo = obj;
@@ -103,3 +146,10 @@ document.getElementById("goBackButton").onclick = function() {
     window.location.href = `/LoginSuccess/GateOptions/OptionsMenu.html?id=${gateRegId}`;
 
 }
+
+
+// document.getElementById("entry0").onclick = function() {
+
+//     window.location.href = `/LoginSuccess/GateOptions/OptionsMenu.html?id=${gateRegId}`;
+
+// }

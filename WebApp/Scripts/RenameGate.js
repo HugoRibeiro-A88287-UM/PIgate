@@ -92,7 +92,7 @@ function sendReportMsg(msg,color){
     switch(color)
     {
         case green:
-            msgReport.style.color = "rgb(5, 104, 5)";
+            msgReport.style.color = "rgb(80, 247, 94);";
             break;
         
         case red:
