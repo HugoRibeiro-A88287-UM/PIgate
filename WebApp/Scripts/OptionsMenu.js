@@ -98,7 +98,7 @@ document.getElementById("isToOpenButton").onclick = function() {
     });
 
     set(ref(database, `Car_Reg/Not Available|${gateRegInfo.PIgate_ID}`), {
-        Description: "Opened By Open Now"
+        Description: "Opened with WebApp"
     });
 
 }
