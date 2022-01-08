@@ -10,7 +10,7 @@
 #include <linux/err.h>
 #include <linux/mm.h>
 #include <linux/io.h>
-//#include <mach/platform.h>
+#include <linux/gpio.h> 
 
 #include "utils.h"
 
@@ -38,7 +38,7 @@ static const int relayInput = 27;
 static const int relayOutput = 4;
 
 
-ssize_t relay_device_write(struct file *pfile, const char __user *pbuff, size_t len, loff_t *off) { //tirar o static
+ssize_t relay_device_write(struct file *pfile, const char __user *pbuff, size_t len, loff_t *off) {
 	struct GpioRegisters *pdev; 
 	
 	pr_alert("%s: called (%u)\n",__FUNCTION__,len);
@@ -57,9 +57,21 @@ ssize_t relay_device_write(struct file *pfile, const char __user *pbuff, size_t 
 	return len;
 }
 
-ssize_t relay_device_read(struct file *pfile, char __user *p_buff,size_t len, loff_t *poffset){
+ssize_t relay_device_read(struct file *pfile, char __user *pbuff,size_t len, loff_t *poffset){
 	pr_alert("%s: called (%u)\n",__FUNCTION__,len);
+
+	if(unlikely(pfile->private_data == NULL))
+		return -EFAULT;
+
+	char buffer[2];
+	int i = gpio_get_value(relayInput);
+	sprintf(buffer, "%d", i);
+
+	copy_to_user(pbuff, buffer, 1);
+	printk(KERN_INFO "PIN -> %d\n", i);
+
 	return 0;
+
 }
 
 int relay_device_close(struct inode *p_inode, struct file * pfile){
