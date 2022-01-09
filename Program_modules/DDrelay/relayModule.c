@@ -1,12 +1,11 @@
+#include <linux/kernel.h>	/* Needed for KERN_INFO */
 #include <linux/cdev.h>
 #include <linux/module.h>
 #include <linux/fs.h>
 #include <linux/device.h>
 #include <linux/init.h>
-#include <linux/module.h>
 #include <asm/io.h>
 #include <linux/timer.h>
-#include <linux/device.h>
 #include <linux/err.h>
 #include <linux/mm.h>
 #include <linux/io.h>
@@ -14,6 +13,20 @@
 #include <linux/types.h>
 
 /**************** 	DEFINES *************/
+#define  PIN_PULL_OFF               0
+#define  PIN_PULL_DOWN              1
+#define  PIN_PULL_UP                2
+
+#define GPIO_INPUT     0b000
+#define GPIO_OUTPUT    0b001
+#define GPIO_ALT_FUNC0 0b100
+#define GPIO_ALT_FUNC1 0b101
+#define GPIO_ALT_FUNC2 0b110
+#define GPIO_ALT_FUNC3 0b111
+#define GPIO_ALT_FUNC4 0b011
+#define GPIO_ALT_FUNC5 0b010
+
+
 #define BCM2708_PERI_BASE       0xFE000000
 #define GPIO_BASE (BCM2708_PERI_BASE + 0x200000) // GPIO controller
 
@@ -50,6 +63,8 @@ void SetGPIOFunction(struct GpioRegisters *s_pGpioRegisters, int GPIO, int funct
 
 /**************** FUNTIONS *************/
 MODULE_LICENSE("GPL");
+MODULE_AUTHOR("PIgate"); 
+MODULE_DESCRIPTION("Relay PWM driver");
 
 /* Device variables */
 static struct class* relayClass = NULL;
@@ -166,8 +181,8 @@ static int __init relayModule_init(void) {
 	
 	pr_alert("map to virtual adresse: 0x%x\n", (unsigned)s_pGpioRegisters);
 	
-	SetGPIOFunction(s_pGpioRegisters, relayInput , 0b000); 		//Input
-	SetGPIOFunction(s_pGpioRegisters, relayOutput, 0b001); 	//Output
+	SetGPIOFunction(s_pGpioRegisters, relayInput , GPIO_INPUT); 		
+	SetGPIOFunction(s_pGpioRegisters, relayOutput, GPIO_OUTPUT); 	
 
 	return 0;
 }
@@ -176,8 +191,8 @@ static void __exit relayModule_exit(void) {
 	
 	pr_alert("%s: called\n",__FUNCTION__);
 	
-	SetGPIOFunction(s_pGpioRegisters, relayInput , 0); //Configure the pin as input
-	SetGPIOFunction(s_pGpioRegisters, relayOutput, 0); 
+	SetGPIOFunction(s_pGpioRegisters, relayInput , GPIO_INPUT); 
+	SetGPIOFunction(s_pGpioRegisters, relayOutput, GPIO_INPUT); 
 	iounmap(s_pGpioRegisters);
 	cdev_del(&c_dev);
 	device_destroy(relayClass, relayMajorMinor);

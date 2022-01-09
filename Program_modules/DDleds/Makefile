@@ -1,5 +1,5 @@
-obj-m := relay.o
-relay-objs:= relayModule.o utils.o
+obj-m := ledRGB.o
+ledRGB-objs:= ledModule.o
 KDIR := /home/hugo/Downloads/buildroot-2021.02.5/output/build/linux-custom
 ARCH ?= arm64
 CROSS_COMPILE ?= aarch64-buildroot-linux-gnu-
@@ -14,5 +14,5 @@ KBUILD_TARGETS	:= clean help modules modules_install
 
 all: modules
 $(KBUILD_TARGETS):
-	#$(MAKE) -C $(KDIR) M=$(shell pwd) $@ EXTRA_CFLAGS="$(MY_CFLAGS)"
-	$(MAKE) -C $(KDIR) M=$(shell pwd) $@
+	
+	$(MAKE) -C $(KDIR) M=$(shell pwd) $@	
