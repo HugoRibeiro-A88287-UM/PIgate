@@ -43,22 +43,24 @@ int main(void)
 
     /* Configure the PWM, applying a period and duty cycle */ 
     // pwm_config(pwm, priv->duty, priv->pwm_period); 
- 
 
-    // printf("\n Testing Output relay (2 times): \n");
-    // sleep(1);
-    // while(count != 2)
-    // {
-        
-    //     /* Start toggling */ 
-    //     pwm_enable(pchip->pwmd);
-    //     sleep(4);
+    int fd0 = open("/dev/ledRGB0", O_RDWR);
+    char incPwm = '1';
+    char pwmOff = '0';
+    char pBuff;
+
+    printf("\n Testing Output relay (2 times): \n");
+    sleep(1);
+    while(count != 2)
+    {
+        write(fd0, &incPwm, 1);
+        printf("PWM Inc! \n ");
        
-    //     /* And then stop toggling*/ 
-    //     pwm_disable(pchip->pwmd); 
-    //     sleep(4);
-    //     count++;
-    // }
+        sleep(2);
+        count++;
+    }
+
+    write(fd0, &pwmOff, 1);
 
     printf("Closing Device Driver.\n");
 

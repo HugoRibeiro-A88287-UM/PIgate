@@ -35,13 +35,17 @@
 #define GPIO_ALT_FUNC5 0b010
 
 #define PERIPH_BASE 0xFE000000
+#define BLOCK_SIZE 		(4*1024)
+
 #define GPIO_BASE (PERIPH_BASE + 0x200000)
 #define PWM_BASE (PERIPH_BASE + 0x20C000)
 #define PWM_CLK_BASE (PERIPH_BASE + 0x101000)
 #define PWMCLK_CNTL	40
 #define PWMCLK_DIV	41
+
 //The Raspberry Pi PWM clock has a base frequency of 19.2 MHz
 #define CLK_RATE 19200000 //Hz
+
 
 #define DEVICE_NAME "ledRGB0"
 #define CLASS_NAME "ledRGBClass"
@@ -82,7 +86,7 @@ struct GpioRegisters
       uint32_t Reserved11[4];
 };
 
-struct pwmRegisters
+volatile struct pwmRegisters
 {
 	uint32_t CTL;
 	uint32_t STA;
@@ -123,15 +127,12 @@ struct S_PWM_STA {
 	unsigned RERR1 : 1;
 	unsigned GAPO1 : 1;
 	unsigned GAPO2 : 1;
-	unsigned GAPO3 : 1;
-	unsigned GAPO4 : 1;
+	unsigned Reserved1 : 2;
 	unsigned BERR : 1;
 	unsigned STA1 : 1;
 	unsigned STA2 : 1;
-	unsigned STA3 : 1;
-	unsigned STA4 : 1;
-	unsigned Reserved : 19;
-} *pwm_sta;
+	unsigned Reserved2 : 21;
+} volatile *pwm_sta;
 /**************** 	STRUCTS *************/
 
 
@@ -204,14 +205,14 @@ static int __init  ledRGBModule_init(void)
    s_pGpioRegisters->GPSET[LED_BLUE / 32] = (1 << (LED_BLUE % 32));
 	
 
-	s_pPwmRegisters = (struct pwmRegisters *)ioremap(PWM_BASE, sizeof(struct pwmRegisters));
-	pwm_ctl = (struct S_PWM_CTL *) &s_pPwmRegisters -> CTL;
-	pwm_sta = (struct S_PWM_STA *) &s_pPwmRegisters -> STA;
-	s_pPwmClkRegisters = ioremap(PWM_CLK_BASE, 4096);
+	s_pPwmRegisters = (volatile struct pwmRegisters *)ioremap(PWM_BASE, sizeof(struct pwmRegisters));
+	pwm_ctl = (struct S_PWM_CTL *) &s_pPwmRegisters->CTL;
+	pwm_sta = (struct S_PWM_STA *) &s_pPwmRegisters->STA;
+	s_pPwmClkRegisters = ioremap(PWM_CLK_BASE, BLOCK_SIZE);
 
    //frequency in kHz
 	pwm_frequency(1000);
-	pwm_dutyCicle(512, 1024);
+	pwm_dutyCicle(50, 1024);
 
 	return 0;
 }
@@ -284,7 +285,6 @@ static void pwm_frequency(uint32_t freq) {
 
    /*
       GPIO 12 (PWM0)
-
       Alt0	   Alt1	    Alt2	      Alt3	        Alt4	     Alt5
       PWM0	  SMI SD4	DPI D8	AVEOUT VID8	   AVEIN VID8	JTAG TMS
    */

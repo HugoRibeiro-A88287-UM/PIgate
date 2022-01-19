@@ -16,3 +16,6 @@ all: modules
 $(KBUILD_TARGETS):
 	
 	$(MAKE) -C $(KDIR) M=$(shell pwd) $@	
+	
+clean:
+	$(MAKE) -C $(KDIR) M=$(shell pwd) clean
