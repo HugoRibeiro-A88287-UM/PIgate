@@ -1,8 +1,8 @@
 obj-m := ledRGB.o
 ledRGB-objs:= ledModule.o
 KDIR := /home/hugo/Downloads/buildroot-2021.02.5/output/build/linux-custom
-ARCH ?= arm64
-CROSS_COMPILE ?= aarch64-buildroot-linux-gnu-
+ARCH ?= arm
+CROSS_COMPILE ?= arm-buildroot-linux-gnueabihf-
 
 
 export ARCH CROSS_COMPILE

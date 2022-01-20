@@ -3,19 +3,6 @@
 #include <unistd.h>
 #include <fcntl.h> 
 
-
-// struct pwm_device { 
-//    const char *label; 
-//    unsigned long flags; 
-//    unsigned int hwpwm; 
-//    unsigned int pwm; 
-//    struct pwm_chip *chip; 
-//    void *chip_data; 
- 
-//    struct pwm_args args;  
-//    struct pwm_state state;
-// }; 
-
 void simpleDelay (void)
 {
     volatile unsigned int i;
@@ -39,28 +26,45 @@ int main(void)
     system("ls -l /dev/ledRGB0");
     sleep(3);
 
-    //static void pwm_led_drive(struct pwm_device *pwm, struct private_data *priv) 
-
-    /* Configure the PWM, applying a period and duty cycle */ 
-    // pwm_config(pwm, priv->duty, priv->pwm_period); 
-
     int fd0 = open("/dev/ledRGB0", O_RDWR);
-    char incPwm = '1';
-    char pwmOff = '0';
-    char pBuff;
+    const char r[] = "red";
+    const char g[] = "green";
+    const char y[] = "yellow";
+    const char i[] = "idle";
 
-    printf("\n Testing Output relay (2 times): \n");
+
+    printf("\n Testing Output relay (1 times): \n");
     sleep(1);
-    while(count != 2)
+    while(count != 1)
     {
-        write(fd0, &incPwm, 1);
-        printf("PWM Inc! \n ");
+        write(fd0, &y, 1);
+        printf("Yellow Color: %s \n ", y);
+
+        sleep(7);
+
+      
+        write(fd0, &r, 1);
+        printf("Red Color: %s \n ", r );
        
-        sleep(2);
+        sleep(7);
+
+    
+        write(fd0, &g, 1);
+        printf("Green Color: %s \n ", g );
+
+
+        sleep(7);
+
+      
+        write(fd0, &i, 1);
+        printf("Idle State: %s \n ", i);
+
+        sleep(7);
+        
         count++;
     }
 
-    write(fd0, &pwmOff, 1);
+    //read(fd0,&pbuff,1);
 
     printf("Closing Device Driver.\n");
 

@@ -60,7 +60,7 @@
 struct GpioRegisters
 {
       uint32_t GPFSEL[6];
-      uint32_t Reserved0; // Reserved byte
+      uint32_t Reserved0;
       uint32_t GPSET[2];
       uint32_t Reserved1;
       uint32_t GPCLR[2];
@@ -148,6 +148,9 @@ struct GpioRegisters *s_pGpioRegisters;
 volatile unsigned int *s_pPwmClkRegisters;
 /**************** VARIABLES *************/
 
+typedef enum state{allow = 0 , denied , warning, idle}state_t;
+state_t pwmState = idle;
+
 
 /**************** FUNTIONS *************/
 void SetGPIOFunction(struct GpioRegisters *s_pGpioRegisters, int GPIO, int functionCode);
@@ -158,13 +161,92 @@ static void pwm_frequency(uint32_t freq);
 /*
  * Establish the PWM duty cicle :
  */
-static void pwm_dutyCicle(unsigned n,unsigned m);
+static void pwmRed_dutyCicle(unsigned n,unsigned m);
+static void pwmGreen_dutyCicle(unsigned n,unsigned m);
 /**************** FUNTIONS *************/
 
+ssize_t ledRGB_device_write(struct file *pfile, const char __user *pbuff, size_t len, loff_t *off) {
+	struct GpioRegisters *pdev; 
+	
+	pr_alert("%s: called (%u)\n",__FUNCTION__,len);
+
+	if(unlikely(pfile->private_data == NULL))
+		return -EFAULT;
+
+	switch (pbuff[0])
+	{
+	case 'y': //generate the warning color
+	case 'Y':
+		pwmRed_dutyCicle(1024,1024);
+		pwmGreen_dutyCicle(1024,1024);
+		s_pGpioRegisters->GPCLR[LED_BLUE / 32] = (1 << (LED_BLUE % 32));
+		pwmState = warning;
+		printk("pwmState: Warning");
+		break;
+
+	case 'r': //generate the denied color
+	case 'R':
+		pwmRed_dutyCicle(1024,1024);
+		pwmGreen_dutyCicle(0,1024);
+		s_pGpioRegisters->GPCLR[LED_BLUE / 32] = (1 << (LED_BLUE % 32));
+		pwmState = denied;
+		printk("pwmState: denied");
+		break;
+
+	case 'g': //generate the allow color
+	case 'G':
+		pwmRed_dutyCicle(0,1024);
+		pwmGreen_dutyCicle(1024,1024);
+		s_pGpioRegisters->GPCLR[LED_BLUE / 32] = (1 << (LED_BLUE % 32));
+		pwmState = allow;
+		printk("pwmState: Allow");
+		break;
+	
+	default: //generate the idle color
+		pwmRed_dutyCicle(410,1024);
+		pwmGreen_dutyCicle(715,1024);
+		s_pGpioRegisters->GPSET[LED_BLUE / 32] = (1 << (LED_BLUE % 32));
+		pwmState = idle;
+		printk("pwmState: Idle");
+		break;
+	}
+
+	return len;
+}
+
+ssize_t ledRGB_device_read(struct file *pfile, char __user *pbuff,size_t len, loff_t *poffset){
+	pr_alert("%s: called (%u)\n",__FUNCTION__,len);
+
+	if(unlikely(pfile->private_data == NULL))
+		return -EFAULT;
+
+	return 0;
+
+}
+
+int ledRGB_device_close(struct inode *p_inode, struct file * pfile){
+	
+	pr_alert("%s: called\n",__FUNCTION__);
+	pfile->private_data = NULL;
+	return 0;
+}
+
+
+int ledRGB_device_open(struct inode* p_indode, struct file *p_file){
+
+	pr_alert("%s: called\n",__FUNCTION__);
+	p_file->private_data = (struct GpioRegisters *) s_pGpioRegisters;
+	return 0;
+	
+}
 
 
 static struct file_operations ledRGBDevice_fops = {
 	.owner = THIS_MODULE,
+	.write = ledRGB_device_write,
+	.read = ledRGB_device_read,
+	.release = ledRGB_device_close,
+	.open = ledRGB_device_open,
 };
  
 static int __init  ledRGBModule_init(void)
@@ -212,7 +294,10 @@ static int __init  ledRGBModule_init(void)
 
    //frequency in kHz
 	pwm_frequency(1000);
-	pwm_dutyCicle(50, 1024);
+	pwmRed_dutyCicle(410,1024);
+	pwmGreen_dutyCicle(715,1024);
+	s_pGpioRegisters->GPSET[LED_BLUE / 32] = (1 << (LED_BLUE % 32));
+	pwmState = idle;
 
 	return 0;
 }
@@ -289,6 +374,12 @@ static void pwm_frequency(uint32_t freq) {
       PWM0	  SMI SD4	DPI D8	AVEOUT VID8	   AVEIN VID8	JTAG TMS
    */
 	SetGPIOFunction(s_pGpioRegisters,LED_RED_PWM0, GPIO_ALT_FUNC0);
+	/*
+      GPIO 13 (PWM1)
+      Alt0	   Alt1	    Alt2	      Alt3	        Alt4	     Alt5
+      PWM1	  SMI SD5	DPI D9	AVEOUT VID9	   AVEIN VID9	JTAG TCK
+   */
+	SetGPIOFunction(s_pGpioRegisters,LED_GREEN_PWM1, GPIO_ALT_FUNC0);
 	printk("Sbit == %d\n", (pwm_ctl->SBIT1 & 0xFF) );
 
 	pwm_ctl->MODE1 = 0; /* PWM mode */
@@ -300,7 +391,7 @@ static void pwm_frequency(uint32_t freq) {
 	pwm_ctl->CLRF1 = 1;
 }
 
-static void pwm_dutyCicle(unsigned n,unsigned m) {
+static void pwmRed_dutyCicle(unsigned n,unsigned m) {
 
    /* Disable PWM */
 	pwm_ctl->PWEN1 = 0;
@@ -315,13 +406,37 @@ static void pwm_dutyCicle(unsigned n,unsigned m) {
 		if ( pwm_sta->BERR ) pwm_sta->BERR = 1;
 	}
 
-	printk("Err == %d\n", s_pPwmRegisters -> STA );
-
 	udelay(10); /* Pause */
 
    /* Enable PWM*/
 	pwm_ctl->PWEN1 = 1; 
+
+	printk("Success: New Red Duty Cicle was defined");
 }
+
+static void pwmGreen_dutyCicle(unsigned n,unsigned m) {
+
+//    /* Disable PWM */
+// 	pwm_ctl->PWEN2 = 0;
+
+//    /*Define the ratio for duty cicle*/
+// 	s_pPwmRegisters->RNG2 = m;
+// 	s_pPwmRegisters->DAT2 = n;
+
+// 	if ( !pwm_sta->STA1 ) {
+// 		if ( pwm_sta->RERR2 ) pwm_sta->RERR1 = 1;
+// 		if ( pwm_sta->WERR2 ) pwm_sta->WERR1 = 1;
+// 		if ( pwm_sta->BERR ) pwm_sta->BERR = 1;
+// 	}
+
+// 	udelay(10); /* Pause */
+
+//    /* Enable PWM*/
+// 	pwm_ctl->PWEN2 = 1; 
+
+// 	printk("Success: New Green Duty Cicle was defined");
+}
+
 
 /**************** FUNTIONS *************/
 

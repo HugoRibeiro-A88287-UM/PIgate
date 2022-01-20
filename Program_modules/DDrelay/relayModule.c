@@ -27,16 +27,38 @@
 #define GPIO_ALT_FUNC5 0b010
 
 
-#define BCM2708_PERI_BASE       0xFE000000
-#define GPIO_BASE (BCM2708_PERI_BASE + 0x200000) // GPIO controller
+#define PERIPH_BASE 0xFE000000
+#define BLOCK_SIZE 		(4*1024)
+
+#define GPIO_BASE (PERIPH_BASE + 0x200000) // GPIO controller
 
 struct GpioRegisters
 {
-	uint32_t GPFSEL[6];
-	uint32_t Reserved1;
-	uint32_t GPSET[2];
-	uint32_t Reserved2;
-	uint32_t GPCLR[2];
+      uint32_t GPFSEL[6];
+      uint32_t Reserved0;
+      uint32_t GPSET[2];
+      uint32_t Reserved1;
+      uint32_t GPCLR[2];
+      uint32_t Reserved2;
+      uint32_t GPLEV[2];
+      uint32_t Reserved3;
+      uint32_t GPEDS[2];
+      uint32_t Reserved4;
+      uint32_t GPREN[2];
+      uint32_t Reserved5;
+      uint32_t GPFEN[2];
+      uint32_t Reserved6;
+      uint32_t GPHEN[2];
+      uint32_t Reserved7;
+      uint32_t GPLEN[2];
+      uint32_t Reserved8;
+      uint32_t GPAREN[2];
+      uint32_t Reserved9;
+      uint32_t GPAFEN[2];
+      uint32_t Reserved10;
+      uint32_t GPPUD;
+      uint32_t GPPUDCLK[2];
+      uint32_t Reserved11[4];
 };
 
 
@@ -62,9 +84,6 @@ void SetGPIOFunction(struct GpioRegisters *s_pGpioRegisters, int GPIO, int funct
 
 
 /**************** FUNTIONS *************/
-MODULE_LICENSE("GPL");
-MODULE_AUTHOR("PIgate"); 
-MODULE_DESCRIPTION("Relay PWM driver");
 
 /* Device variables */
 static struct class* relayClass = NULL;
@@ -177,7 +196,6 @@ static int __init relayModule_init(void) {
 
 
 	s_pGpioRegisters = (struct GpioRegisters *)ioremap(GPIO_BASE, sizeof(struct GpioRegisters));
-	//s_pGpioRegisters = (struct GpioRegisters *)ioremap_cache(GPIO_BASE, sizeof(struct GpioRegisters));
 	
 	pr_alert("map to virtual adresse: 0x%x\n", (unsigned)s_pGpioRegisters);
 	
@@ -200,6 +218,9 @@ static void __exit relayModule_exit(void) {
 	unregister_chrdev_region(relayMajorMinor, 1);
 }
 
+MODULE_LICENSE("GPL");
+MODULE_AUTHOR("PIgate"); 
+MODULE_DESCRIPTION("Relay PWM driver");
 module_init(relayModule_init);
 module_exit(relayModule_exit);
 

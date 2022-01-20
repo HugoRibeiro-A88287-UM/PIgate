@@ -1,8 +1,8 @@
 obj-m := relay.o
 relay-objs:= relayModule.o
 KDIR := /home/hugo/Downloads/buildroot-2021.02.5/output/build/linux-custom
-ARCH ?= arm64
-CROSS_COMPILE ?= aarch64-buildroot-linux-gnu-
+ARCH ?= arm
+CROSS_COMPILE ?= arm-buildroot-linux-gnueabihf-
 
 
 export ARCH CROSS_COMPILE
@@ -14,6 +14,8 @@ KBUILD_TARGETS	:= clean help modules modules_install
 
 all: modules
 $(KBUILD_TARGETS):
-	#$(MAKE) -C $(KDIR) M=$(shell pwd) $@ EXTRA_CFLAGS="$(MY_CFLAGS)"
 	$(MAKE) -C $(KDIR) M=$(shell pwd) $@
 	scp relay.ko root@10.42.0.74:/etc
+
+clean:
+        $(MAKE) -C $(KDIR) M=$(shell pwd) clean
