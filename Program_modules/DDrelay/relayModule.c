@@ -194,13 +194,12 @@ static int __init relayModule_init(void) {
 		return ret;
 	}
 
-
 	s_pGpioRegisters = (struct GpioRegisters *)ioremap(GPIO_BASE, sizeof(struct GpioRegisters));
 	
-	pr_alert("map to virtual adresse: 0x%x\n", (unsigned)s_pGpioRegisters);
-	
 	SetGPIOFunction(s_pGpioRegisters, relayInput , GPIO_INPUT); 		
-	SetGPIOFunction(s_pGpioRegisters, relayOutput, GPIO_OUTPUT); 	
+	SetGPIOFunction(s_pGpioRegisters, relayOutput, GPIO_OUTPUT);
+
+	printk("Success: Relay initialization"); 	
 
 	return 0;
 }
@@ -216,6 +215,8 @@ static void __exit relayModule_exit(void) {
 	device_destroy(relayClass, relayMajorMinor);
 	class_destroy(relayClass);
 	unregister_chrdev_region(relayMajorMinor, 1);
+
+	printk("Success: Relay Exit"); 	
 }
 
 MODULE_LICENSE("GPL");

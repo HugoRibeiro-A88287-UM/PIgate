@@ -33,31 +33,28 @@ int main(void)
     const char i[] = "idle";
 
 
-    printf("\n Testing Output relay (1 times): \n");
+    printf("\n Testing led RGB: \n");
     sleep(1);
     while(count != 1)
     {
         write(fd0, &y, 1);
-        printf("Yellow Color: %s \n ", y);
+        printf("Warning Color: %s \n ", y);
 
         sleep(7);
 
-      
-        write(fd0, &r, 1);
-        printf("Red Color: %s \n ", r );
-       
-        sleep(7);
-
-    
         write(fd0, &g, 1);
-        printf("Green Color: %s \n ", g );
-
+        printf("Allowed Color: %s \n ", g );
 
         sleep(7);
 
-      
+
+        write(fd0, &r, 1);
+        printf("Denied Color: %s \n ", r );
+
+        sleep(7);
+
         write(fd0, &i, 1);
-        printf("Idle State: %s \n ", i);
+        printf("Idle Color: %s \n ", i);
 
         sleep(7);
         

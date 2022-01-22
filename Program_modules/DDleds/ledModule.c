@@ -38,7 +38,8 @@
 #define BLOCK_SIZE 		(4*1024)
 
 #define GPIO_BASE (PERIPH_BASE + 0x200000)
-#define PWM_BASE (PERIPH_BASE + 0x20C000)
+#define PWM0_BASE (PERIPH_BASE + 0x20C000)
+#define PWM1_BASE (PERIPH_BASE + 0x20C800)
 #define PWM_CLK_BASE (PERIPH_BASE + 0x101000)
 #define PWMCLK_CNTL	40
 #define PWMCLK_DIV	41
@@ -98,16 +99,16 @@ volatile struct pwmRegisters
 	uint32_t reserved1;
 	uint32_t RNG2;
 	uint32_t DAT2;
-} *s_pPwmRegisters;
+} *s_pPwm0Registers;
 
-struct S_PWM_CTL {
+volatile struct S_PWM_CTL {
 	unsigned PWEN1 : 1;
 	unsigned MODE1 : 1;
 	unsigned RPTL1 : 1;
 	unsigned SBIT1 : 1;
 	unsigned POLA1 : 1;
 	unsigned USEF1 : 1;
-	unsigned CLRF1 : 1;
+	unsigned CLRF  : 1;
 	unsigned MSEN1 : 1;
 	unsigned PWEN2 : 1;
 	unsigned MODE2 : 1;
@@ -118,9 +119,9 @@ struct S_PWM_CTL {
 	unsigned Reserved1 : 1;
 	unsigned MSEN2 : 1;
 	unsigned Reserved2 : 16;
-} *pwm_ctl;
+} *pwm0_ctl;
 
-struct S_PWM_STA {
+volatile struct S_PWM_STA {
 	unsigned FULL1 : 1;
 	unsigned EMPT1 : 1;
 	unsigned WERR1 : 1;
@@ -132,7 +133,7 @@ struct S_PWM_STA {
 	unsigned STA1 : 1;
 	unsigned STA2 : 1;
 	unsigned Reserved2 : 21;
-} volatile *pwm_sta;
+}*pwm0_sta;
 /**************** 	STRUCTS *************/
 
 
@@ -231,7 +232,6 @@ int ledRGB_device_close(struct inode *p_inode, struct file * pfile){
 	return 0;
 }
 
-
 int ledRGB_device_open(struct inode* p_indode, struct file *p_file){
 
 	pr_alert("%s: called\n",__FUNCTION__);
@@ -239,7 +239,6 @@ int ledRGB_device_open(struct inode* p_indode, struct file *p_file){
 	return 0;
 	
 }
-
 
 static struct file_operations ledRGBDevice_fops = {
 	.owner = THIS_MODULE,
@@ -282,14 +281,11 @@ static int __init  ledRGBModule_init(void)
 
 	s_pGpioRegisters = (struct GpioRegisters *)ioremap(GPIO_BASE, sizeof(struct GpioRegisters));
 	SetGPIOFunction(s_pGpioRegisters,LED_BLUE, GPIO_OUTPUT);
-	
-   //Active the blue led
-   s_pGpioRegisters->GPSET[LED_BLUE / 32] = (1 << (LED_BLUE % 32));
-	
 
-	s_pPwmRegisters = (volatile struct pwmRegisters *)ioremap(PWM_BASE, sizeof(struct pwmRegisters));
-	pwm_ctl = (struct S_PWM_CTL *) &s_pPwmRegisters->CTL;
-	pwm_sta = (struct S_PWM_STA *) &s_pPwmRegisters->STA;
+	s_pPwm0Registers = (volatile struct pwmRegisters *)ioremap(PWM0_BASE, sizeof(struct pwmRegisters));
+	pwm0_ctl = (volatile struct S_PWM_CTL *) &s_pPwm0Registers->CTL;
+	pwm0_sta = (volatile struct S_PWM_STA *) &s_pPwm0Registers->STA;
+
 	s_pPwmClkRegisters = ioremap(PWM_CLK_BASE, BLOCK_SIZE);
 
    //frequency in kHz
@@ -298,6 +294,8 @@ static int __init  ledRGBModule_init(void)
 	pwmGreen_dutyCicle(715,1024);
 	s_pGpioRegisters->GPSET[LED_BLUE / 32] = (1 << (LED_BLUE % 32));
 	pwmState = idle;
+
+	printk("Success: PWM initialization");
 
 	return 0;
 }
@@ -310,14 +308,17 @@ static void __exit ledRGBModule_exit(void)
 
 	SetGPIOFunction(s_pGpioRegisters,LED_BLUE, GPIO_INPUT);
 	SetGPIOFunction(s_pGpioRegisters,LED_RED_PWM0, GPIO_INPUT);
+	SetGPIOFunction(s_pGpioRegisters,LED_GREEN_PWM1, GPIO_INPUT);
 
 	iounmap(s_pGpioRegisters);
-	iounmap(s_pPwmRegisters);
+	iounmap(s_pPwm0Registers);
 	iounmap(s_pPwmClkRegisters);
 	cdev_del(&c_dev);
 	device_destroy(ledRGBClass, ledRGBMajorMinor);
 	class_destroy(ledRGBClass);
 	unregister_chrdev_region(ledRGBMajorMinor, 1);
+
+	printk("Success: PWM Exit");
 }
 
 /**************** FUNTIONS *************/
@@ -340,11 +341,15 @@ static void pwm_frequency(uint32_t freq) {
 	long idiv;
 	int rc = 0;
 
+	//Clock Manager password "5a"
+
 	/*
 	 * Kill the clock:
 	 */
 	*(s_pPwmClkRegisters+PWMCLK_CNTL) = 0x5A000020; /* Kill clock */
-	pwm_ctl->PWEN1 = 0; /* Disable PWM */
+	pwm0_ctl->PWEN1 = 0; /* Disable PWM */
+	pwm0_ctl->PWEN2 = 0; 
+
 	udelay(10);
 
 	/*
@@ -366,7 +371,6 @@ static void pwm_frequency(uint32_t freq) {
 	*/
 	*(s_pPwmClkRegisters+PWMCLK_CNTL) = 0x5A000011;
 	udelay(10);
-	printk("Busy clk == %d\n", (*(s_pPwmClkRegisters+PWMCLK_CNTL) & 0x80) );
 
    /*
       GPIO 12 (PWM0)
@@ -380,61 +384,71 @@ static void pwm_frequency(uint32_t freq) {
       PWM1	  SMI SD5	DPI D9	AVEOUT VID9	   AVEIN VID9	JTAG TCK
    */
 	SetGPIOFunction(s_pGpioRegisters,LED_GREEN_PWM1, GPIO_ALT_FUNC0);
-	printk("Sbit == %d\n", (pwm_ctl->SBIT1 & 0xFF) );
 
-	pwm_ctl->MODE1 = 0; /* PWM mode */
-	pwm_ctl->RPTL1 = 0;
-	pwm_ctl->SBIT1 = 0;
-	pwm_ctl->POLA1 = 0;
-	pwm_ctl->USEF1 = 0;
-	pwm_ctl->MSEN1 = 0;
-	pwm_ctl->CLRF1 = 1;
+	//Define Channel 1 pwm0/1 characteristics 
+
+	pwm0_ctl->MODE1 = 0; /*			PWM mode		*/	pwm0_ctl->MODE2 = 0;
+	pwm0_ctl->RPTL1 = 0; /*		Repeat Last Data	*/	pwm0_ctl->RPTL2 = 0;
+	pwm0_ctl->SBIT1 = 0; /*		Silence Bit			*/	pwm0_ctl->SBIT2 = 0;
+	pwm0_ctl->POLA1 = 0; /*		 Polarity			*/	pwm0_ctl->POLA2 = 0;
+	pwm0_ctl->USEF1 = 0; /*		 Use FIFO			*/	pwm0_ctl->USEF2 = 0;
+	pwm0_ctl->MSEN1 = 0; /*		 M/S				*/	pwm0_ctl->MSEN2 = 0;
+
+	pwm0_ctl->CLRF = 1; /*Clear FIFO*/
+
+
+
+	printk("Success: Set PWM frequency");
 }
 
 static void pwmRed_dutyCicle(unsigned n,unsigned m) {
 
    /* Disable PWM */
-	pwm_ctl->PWEN1 = 0;
+	pwm0_ctl->PWEN1 = 0;
+	pwm0_ctl->PWEN2 = 0;
 
    /*Define the ratio for duty cicle*/
-	s_pPwmRegisters->RNG1 = m;
-	s_pPwmRegisters->DAT1 = n;
+	s_pPwm0Registers->RNG1 = m;
+	s_pPwm0Registers->DAT1 = n;
 
-	if ( !pwm_sta->STA1 ) {
-		if ( pwm_sta->RERR1 ) pwm_sta->RERR1 = 1;
-		if ( pwm_sta->WERR1 ) pwm_sta->WERR1 = 1;
-		if ( pwm_sta->BERR ) pwm_sta->BERR = 1;
+	if ( !pwm0_sta->STA1 ) {
+		if ( pwm0_sta->RERR1 ) pwm0_sta->RERR1 = 1;
+		if ( pwm0_sta->WERR1 ) pwm0_sta->WERR1 = 1;
+		if ( pwm0_sta->BERR ) pwm0_sta->BERR = 1;
 	}
 
 	udelay(10); /* Pause */
 
    /* Enable PWM*/
-	pwm_ctl->PWEN1 = 1; 
+   	pwm0_ctl->PWEN2 = 1;
+	pwm0_ctl->PWEN1 = 1; 
 
 	printk("Success: New Red Duty Cicle was defined");
 }
 
 static void pwmGreen_dutyCicle(unsigned n,unsigned m) {
 
-//    /* Disable PWM */
-// 	pwm_ctl->PWEN2 = 0;
+   /* Disable PWM */
+	pwm0_ctl->PWEN1 = 0;
+	pwm0_ctl->PWEN2 = 0;
 
-//    /*Define the ratio for duty cicle*/
-// 	s_pPwmRegisters->RNG2 = m;
-// 	s_pPwmRegisters->DAT2 = n;
+   /*Define the ratio for duty cicle*/
+	s_pPwm0Registers->RNG2 = m;
+	s_pPwm0Registers->DAT2 = n;
 
-// 	if ( !pwm_sta->STA1 ) {
-// 		if ( pwm_sta->RERR2 ) pwm_sta->RERR1 = 1;
-// 		if ( pwm_sta->WERR2 ) pwm_sta->WERR1 = 1;
-// 		if ( pwm_sta->BERR ) pwm_sta->BERR = 1;
-// 	}
+	if ( !pwm0_sta->STA2 ) {
+		if ( pwm0_sta->RERR1 ) pwm0_sta->RERR1 = 1;
+		if ( pwm0_sta->WERR1 ) pwm0_sta->WERR1 = 1;
+		if ( pwm0_sta->BERR	 ) pwm0_sta->BERR = 1;
+	}
 
-// 	udelay(10); /* Pause */
+	udelay(10); /* Pause */
 
-//    /* Enable PWM*/
-// 	pwm_ctl->PWEN2 = 1; 
+   /* Enable PWM*/
+   	pwm0_ctl->PWEN2 = 1;
+	pwm0_ctl->PWEN1 = 1; 
 
-// 	printk("Success: New Green Duty Cicle was defined");
+	printk("Success: New Green Duty Cicle was defined");
 }
 
 
