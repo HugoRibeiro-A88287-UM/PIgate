@@ -221,6 +221,12 @@ ssize_t ledRGB_device_read(struct file *pfile, char __user *pbuff,size_t len, lo
 	if(unlikely(pfile->private_data == NULL))
 		return -EFAULT;
 
+	char buffer[2];
+	sprintf(buffer, "%d", pwmState);
+
+	copy_to_user(pbuff, buffer, 1);
+	printk(KERN_INFO "Pwm State read ");
+
 	return 0;
 
 }

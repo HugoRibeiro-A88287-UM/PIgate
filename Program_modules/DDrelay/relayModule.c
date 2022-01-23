@@ -221,7 +221,7 @@ static void __exit relayModule_exit(void) {
 
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("PIgate"); 
-MODULE_DESCRIPTION("Relay PWM driver");
+MODULE_DESCRIPTION("Relay driver");
 module_init(relayModule_init);
 module_exit(relayModule_exit);
 

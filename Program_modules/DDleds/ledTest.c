@@ -31,6 +31,7 @@ int main(void)
     const char g[] = "green";
     const char y[] = "yellow";
     const char i[] = "idle";
+    char receive[] = " ";
 
 
     printf("\n Testing led RGB: \n");
@@ -44,6 +45,9 @@ int main(void)
 
         write(fd0, &g, 1);
         printf("Allowed Color: %s \n ", g );
+        read(fd0,&receive,1);
+        printf("PwmState: %s \n ", receive );
+        
 
         sleep(7);
 
@@ -61,13 +65,16 @@ int main(void)
         count++;
     }
 
-    //read(fd0,&pbuff,1);
+    read(fd0,&receive,1);
+    printf("PwmState: %s \n ", receive );
 
     printf("Closing Device Driver.\n");
 
     putchar('\n');
     printf("Removing Device Driver.\n");
+
     system("rmmod ledRGB");
+    
 
     return 0;
 
