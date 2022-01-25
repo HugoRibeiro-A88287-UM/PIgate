@@ -1,4 +1,5 @@
 import pyrebase
+from datetime import datetime 
 import errno
 
 # Initialize the pyrebase
@@ -15,13 +16,18 @@ config = {
 firebase = pyrebase.initialize_app(config)
 db = firebase.database()
 
-def sendEntry(PIgate_ID, Plate, Time, Date):
+
+def sendEntry(PIgate_ID, Plate):
+
+    now = datetime.now()
+    timeNow = now.strftime("%H:%M:%S")
+    dateNow = now.strftime("%a %b %d %Y")
 
     dataToSend={
         "PIgate_ID": PIgate_ID,
         "Plate": Plate,
-        "Time": Time,
-        "Date": Date
+        "Time": dateNow,
+        "Date": timeNow
     }
 
     try:

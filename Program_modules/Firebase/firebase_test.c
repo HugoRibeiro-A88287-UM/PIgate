@@ -5,6 +5,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
+
+
+
 
 PyObject *pName, *pModule, *pDict; 
 
@@ -54,12 +58,10 @@ void sendEntry(void)
     if (PyCallable_Check(pFunc))
     {       
 
-       const char* pigate_id = "1";
-       const char* plate = "12-33-xx";
-       const char* time = "13.55.33";
-       const char* date = "28-12-2021";
+        const char* pigate_id = "2";
+        const char* plate = "12-33-xx";
 
-        presult = PyObject_CallFunction(pFunc,"ssss",pigate_id,plate,time, date);
+        presult = PyObject_CallFunction(pFunc,"ss",pigate_id,plate);
 
         if( (int)PyLong_AsLong(presult) == EINVAL )
         {
@@ -239,9 +241,11 @@ int main()
     Py_XDECREF(pModule);
     
     //initFirebase();
-    //sendEntry();
-    //ReceivePlates();
-    isToOpen();
+    sendEntry();
+    // sleep(2);
+    // ReceivePlates();
+    // sleep(2);
+    // isToOpen();
 
     //Cleanup
     Py_XDECREF(pDict);
