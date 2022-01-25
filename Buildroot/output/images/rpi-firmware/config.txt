@@ -1,4 +1,4 @@
-# Please note that this is only a sample, we recommend you to change it to fit
+fit
 # your needs.
 # You should override this file using a post-build script.
 # See http://buildroot.org/manual.html#rootfs-custom
@@ -9,7 +9,7 @@
 start_file=start.elf
 fixup_file=fixup.dat
 
-kernel=Image
+kernel=zImage
 
 # To use an external initramfs file
 #initramfs rootfs.cpio.gz
@@ -20,15 +20,19 @@ disable_overscan=1
 
 # How much memory in MB to assign to the GPU on Pi models having
 # 256, 512 or 1024 MB total memory
-gpu_mem_256=100
-gpu_mem_512=100
-gpu_mem_1024=100
+gpu_mem_256=512
+gpu_mem_512=512
+gpu_mem_1024=512
 
 # fixes rpi (3B, 3B+, 3A+, 4B and Zero W) ttyAMA0 serial console
 dtoverlay=miniuart-bt
 
-# enable 64bits support
-arm_64bit=1
 
 #enable pwm
 dtoverlay=pwm-2chan
+
+#enable camera
+dtparam=i2c_arm=on
+dtparam=i2c_vc=on
+dtoverlay=vc4-fkms-v3d
+start_x=1

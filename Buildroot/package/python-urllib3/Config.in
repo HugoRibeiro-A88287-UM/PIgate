@@ -1,7 +1,0 @@
-config BR2_PACKAGE_PYTHON_URLLIB3
-	bool "python-urllib3"
-	help
-	  HTTP library with thread-safe connection pooling, file
-	  post, and more.
-
-	  https://urllib3.readthedocs.io/

@@ -1,5 +1,0 @@
-# md5, sha256 from https://pypi.org/pypi/httplib2/json
-md5  b3d90079f327feb8feb01eef1dd351f4  httplib2-0.20.2.tar.gz
-sha256  e404681d2fbcec7506bcb52c503f2b021e95bee0ef7d01e5c221468a2406d8dc  httplib2-0.20.2.tar.gz
-# Locally computed sha256 checksums
-sha256  589eec38f72df2be203711d3b8cbece9b908c5e7ff00bc3cab7f63bae9e366b4  LICENSE

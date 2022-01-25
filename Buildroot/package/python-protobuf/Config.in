@@ -1,6 +1,0 @@
-config BR2_PACKAGE_PYTHON_PROTOBUF
-	bool "python-protobuf"
-	help
-	  Protocol Buffers.
-
-	  https://developers.google.com/protocol-buffers/

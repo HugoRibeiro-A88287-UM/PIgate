@@ -1,8 +1,0 @@
-config BR2_PACKAGE_PYTHON_JWCRYPTO
-	bool "python-jwcrypto"
-	select BR2_PACKAGE_PYTHON_CRYPTOGRAPHY # runtime
-	select BR2_PACKAGE_PYTHON_DEPRECATED # runtime
-	help
-	  Implementation of JOSE Web standards.
-
-	  https://github.com/latchset/jwcrypto

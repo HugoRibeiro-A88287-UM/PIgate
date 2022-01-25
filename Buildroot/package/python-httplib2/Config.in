@@ -1,8 +1,0 @@
-config BR2_PACKAGE_PYTHON_HTTPLIB2
-	bool "python-httplib2"
-	select BR2_PACKAGE_PYTHON_PYPARSING # runtime
-	select BR2_PACKAGE_PYTHON_PYPARSING # runtime
-	help
-	  A comprehensive HTTP client library.
-
-	  https://github.com/httplib2/httplib2

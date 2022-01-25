@@ -1,6 +1,0 @@
-config BR2_PACKAGE_PYTHON_SIX
-	bool "python-six"
-	help
-	  Python 2 and 3 compatibility utilities.
-
-	  https://github.com/benjaminp/six
