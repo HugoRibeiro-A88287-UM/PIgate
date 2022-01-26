@@ -3,13 +3,13 @@
 
 typedef enum  {relayON = 0 , relayOFF } relayStatus_t;
 
-int initRelay();
+int initRelay(void);
 
-void remRelay();
+void remRelay(void);
 
-int openGate();
+int openGate(void);
 
-int getGateStatus();
+int getGateStatus(void);
 
 
 #endif //RELAY_H

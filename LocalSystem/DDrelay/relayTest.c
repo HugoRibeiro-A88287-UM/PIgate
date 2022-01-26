@@ -20,7 +20,11 @@ int main(void)
     printf("\n");
 
     printf("\n\nInserting Device Driver...\n");
-    system("insmod relay.ko");
+    while (system("insmod relay.ko") != 0)
+    {
+        printf("ERROR");
+        sleep(2);
+    }
 
     printf("\nCheck devicer driver:\n");
     system("lsmod");

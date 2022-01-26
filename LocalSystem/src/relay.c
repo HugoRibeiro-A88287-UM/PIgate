@@ -13,7 +13,7 @@ const char relayClose = '0';
 relayStatus_t relayStatus;
 char isRelayModuleActive = OFF;
 
-int initRelay()
+int initRelay(void)
 {
     while (system("insmod relay.ko") != 0 )
     {}
@@ -23,14 +23,14 @@ int initRelay()
     return EXIT_SUCCESS;
 }
 
-void remRelay()
+void remRelay(void)
 {
     system("rmmod relay.ko");
     isRelayModuleActive = OFF;
     return;
 }
 
-int openGate()
+int openGate(void)
 {
     if(isRelayModuleActive == ON)
     {
@@ -63,7 +63,7 @@ int openGate()
 
 }
 
-int getGateStatus()
+int getGateStatus(void)
 {
     if(isRelayModuleActive == ON)
     {

@@ -1,93 +1,108 @@
-
-#include "/home/hugo/Downloads/buildroot-2021.02.5/output/host/include/python3.9/Python.h"
+#include "../inc/firebase.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <errno.h>
+#include <sys/syslog.h>
 
-PyObject *pName, *pModule, *pDict; 
 
-void initFirebase(void)
+PyObject *pDict = NULL; 
+
+int initFirebase(void)
 {
+    PyObject *pName, *pModule;
 
-   PyObject *pFuncInit, *presult;
+    // Set PYTHONPATH TO working directory
+    setenv("PYTHONPATH",".",1);
+    
+    // Initialize the Python Interpreter
+    Py_Initialize();
 
-   // pFunc is also a borrowed reference 
-   pFuncInit = PyDict_GetItemString(pDict, (char*)"initFirebase");
+    // Build the name object
+    pName = PyUnicode_FromString((char*)"firebase");
 
-    if(PyCallable_Check(pFuncInit))
+    // Load the module object
+    pModule = PyImport_Import(pName);
+
+    if(pModule == NULL)
     {
-        presult = PyObject_CallFunction(pFuncInit,NULL);
-
-        if( (int)PyLong_AsLong(presult) == EINVAL )
-        {
-            printf("Access Error");
-            Py_XDECREF(pDict);
-            Py_XDECREF(pFuncInit);
-            Py_XDECREF(presult);
-            Py_Finalize();
-            exit(-1);
-        }
-    }
-    else 
-    {
-        PyErr_Print();
-        Py_XDECREF(pDict);
-        Py_XDECREF(pFuncInit);
-        Py_XDECREF(presult);
-        Py_Finalize();
-        exit(-1);
+        syslog(LOG_ERR,"No firebase.py available!\n" );
+        return -EXIT_FAILURE;
     }
 
-    Py_XDECREF(pFuncInit);
-    Py_XDECREF(presult);
+    // pDict is a borrowed reference 
+    pDict = PyModule_GetDict(pModule);
 
+    //Cleanup
+    Py_XDECREF(pName);
+    Py_XDECREF(pModule);
+
+    return EXIT_SUCCESS;
 }
 
-void sendEntry(void)
+void remFirebase(void)
+{
+
+    //Cleanup
+    Py_XDECREF(pDict);
+
+    // Finish the Python Interpreter
+    Py_Finalize();
+
+    return EXIT_SUCCESS;
+}
+
+int sendEntry(const char* PIgate_ID, const char* Plate)
 {
     PyObject *pFunc,*presult;
+
+    if(pDict == NULL)
+        return -EXIT_FAILURE;
 
     pFunc = PyDict_GetItemString(pDict, (char*)"sendEntry");
 
     if (PyCallable_Check(pFunc))
     {       
 
-        const char* pigate_id = "2";
-        const char* plate = "12-33-xx";
-
-        presult = PyObject_CallFunction(pFunc,"ss",pigate_id,plate);
+        presult = PyObject_CallFunction(pFunc,"ss",PIgate_ID,Plate);
 
         if( (int)PyLong_AsLong(presult) == EINVAL )
         {
-            printf("Error in sendEntry");
+            syslog(LOG_WARNING,"Entry not sent \n" );
             PyErr_Print();
             Py_XDECREF(pDict);
             Py_XDECREF(pFunc);
             Py_XDECREF(presult);
             Py_Finalize();
-            exit(-1);
+            return -EXIT_FAILURE;
         }
    } 
    else 
    {
-       PyErr_Print();
+        syslog(LOG_ERR,"Python sendEntry function is broken!\n" );
+        PyErr_Print();
         Py_XDECREF(pFunc);
         Py_XDECREF(pDict);
         Py_XDECREF(presult);
         Py_Finalize();
-        exit(-1);
+        return -EXIT_FAILURE;
    }
 
     //Cleanup
    
     Py_XDECREF(pFunc);
     Py_XDECREF(presult);
+
+    return EXIT_SUCCESS;
 }
 
-void ReceivePlates(void)
+int receivePlates(void)
 {
     PyObject *pFunc,*presult;
     int presult_length;
+
+    if(pDict == NULL)
+        return -EXIT_FAILURE;
 
     pFunc = PyDict_GetItemString(pDict, (char*)"getPlates");
 
@@ -98,22 +113,23 @@ void ReceivePlates(void)
 
         if( (int)PyLong_AsLong(presult) == EINVAL )
         {
-            printf("Error in receivePlates");
+            syslog(LOG_WARNING,"Plates not Received\n" );
             Py_XDECREF(pDict);
             Py_XDECREF(pFunc);
             Py_XDECREF(presult);
             Py_Finalize();
-            exit(-1);
+            return -EXIT_FAILURE;
         }
     }
-     else 
-     {
+    else 
+    {
+        syslog(LOG_ERR,"Python getPlates function is broken!\n" );
         PyErr_Print();
         Py_XDECREF(pDict);
         Py_XDECREF(pFunc);
         Py_XDECREF(presult);
         Py_Finalize();
-        exit(-1);
+        return -EXIT_FAILURE;
     }
 
     
@@ -126,42 +142,45 @@ void ReceivePlates(void)
         presultString = PyList_GetItem(presult,i);
         encodedString = PyUnicode_AsEncodedString(presultString, "UTF-8", "strict");
 
+        //Insert length in PIPE
+
         if (encodedString) 
         { //returns NULL if an exception was raised
             char *plates = PyBytes_AsString(encodedString); //pointer refers to the internal buffer of encodedString
         
             if(plates) 
             {
-                printf("Receive plate: %s", plates);
-
-                printf("\n");
+                //Insert IN PIPE
             }
             else
             {
-                printf("\nError Decoding trama2\n");
+                syslog(LOG_WARNING,"Plates pointer is NULL\n" );
             }   
-
         }
         else
         {
-            printf("\nError Decoding trama\n");
+            syslog(LOG_WARNING,"Encoded pointer is NULL\n" );
         }
-
     }
 
     //Cleanup
-    
     Py_XDECREF(pFunc);
     Py_XDECREF(presult);
     Py_XDECREF(presultString);
     Py_XDECREF(encodedString);
+
+    return EXIT_SUCCESS;
 }
 
-void isToOpen(void)
+int isToOpen(void)
 {
     PyObject *pFunc,*presult;
-    PyObject *presultString, *encodedString;
+    PyObject *presultString;
     int presult_length;
+    int isToOpen = 0;
+
+    if(pDict == NULL)
+        return -EXIT_FAILURE;
 
     pFunc = PyDict_GetItemString(pDict, (char*)"checkIsToOpen");
 
@@ -174,79 +193,34 @@ void isToOpen(void)
 
         if( (int)PyLong_AsLong(presult) == EINVAL )
         {
-            printf("Error in checkIsToOpen \n");
+            syslog(LOG_WARNING,"Error in checkIsToOpen \n" );
             Py_XDECREF(pDict);
             Py_XDECREF(pFunc);
             Py_XDECREF(presult);
             Py_Finalize();
-            exit(-1);
+            return -EXIT_FAILURE;
         }
 
-        printf(" \n The isToOpen Variavel is:  %d \n ", (int)PyLong_AsLong(presult));
-
+        isToOpen = (int)PyLong_AsLong(presult);
+        syslog(LOG_INFO, " \n The isToOpen Variavel is:  %d \n ", isToOpen);
+        
     }
-     else 
-     {
+    else 
+    {
+        syslog(LOG_ERR,"Python checkIsToOpen function is broken!\n" );
         PyErr_Print();
         Py_XDECREF(pDict);
         Py_XDECREF(pFunc);
         Py_XDECREF(presult);
         Py_Finalize();
-        exit(-1);
+        return -EXIT_FAILURE;
     }
-
-
 
     //Cleanup
     
     Py_XDECREF(pFunc);
     Py_XDECREF(presult);
     Py_XDECREF(presultString);
-    Py_XDECREF(encodedString);
 
-}
-
-int main()
-{
-
-    // Set PYTHONPATH TO working directory
-    setenv("PYTHONPATH",".",1);
-    
-   // Initialize the Python Interpreter
-   Py_Initialize();
-
-   // Build the name object
-   pName = PyUnicode_FromString((char*)"firebase");
-
-   // Load the module object
-   pModule = PyImport_Import(pName);
-
-    if(pModule == NULL)
-    {
-        printf("No module with that name");
-        return -1;
-    }
-
-    // pDict is a borrowed reference 
-   pDict = PyModule_GetDict(pModule);
-
-    //Cleanup
-    Py_XDECREF(pName);
-    Py_XDECREF(pModule);
-    
-    //initFirebase();
-    sendEntry();
-    sleep(2);
-    ReceivePlates();
-    // sleep(2);
-    // isToOpen();
-
-    //Cleanup
-    Py_XDECREF(pDict);
-
-    // Finish the Python Interpreter
-    Py_Finalize();
-
-
-    return 0;
+    return isToOpen;
 }

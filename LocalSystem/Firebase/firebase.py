@@ -26,8 +26,8 @@ def sendEntry(PIgate_ID, Plate):
     dataToSend={
         "PIgate_ID": PIgate_ID,
         "Plate": Plate,
-        "Time": dateNow,
-        "Date": timeNow
+        "Date": dateNow,
+        "Time": timeNow
     }
 
     try:

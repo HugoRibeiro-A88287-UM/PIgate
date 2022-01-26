@@ -14,7 +14,7 @@ const char yellow[] = "yellow";
 const char idleArray[] = "idle";
 status_t ledStatus = idle;
 
-int initLedRGB()
+int initLedRGB(void)
 {
     while (system("insmod ledRGB.ko") != 0 )
     {}
@@ -24,7 +24,7 @@ int initLedRGB()
     return EXIT_SUCCESS;
 }
 
-void remLedRGB()
+void remLedRGB(void)
 {
     system("rmmod ledRGB.ko");
     isLedRGBModuleActive = OFF;
@@ -96,7 +96,7 @@ int ledRGBStatus(status_t status)
 
 }
 
-int getLedRGBStatus()
+int getLedRGBStatus(void)
 {
     if(isLedRGBModuleActive == ON)
     {
