@@ -18,4 +18,4 @@ $(KBUILD_TARGETS):
 	scp relay.ko root@10.42.0.74:/etc
 
 clean:
-        $(MAKE) -C $(KDIR) M=$(shell pwd) clean
+	$(MAKE) -C $(KDIR) M=$(shell pwd) clean

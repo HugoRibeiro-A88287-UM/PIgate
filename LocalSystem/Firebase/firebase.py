@@ -22,7 +22,7 @@ def sendEntry(PIgate_ID, Plate):
     now = datetime.now()
     timeNow = now.strftime("%H:%M:%S")
     dateNow = now.strftime("%a %b %d %Y")
-
+    
     dataToSend={
         "PIgate_ID": PIgate_ID,
         "Plate": Plate,

@@ -1,14 +1,9 @@
 
-// To compile: aarch64-buildroot-linux-gnu-gcc main.c -lpython3.9 -o teste2.elf
-
 #include "/home/hugo/Downloads/buildroot-2021.02.5/output/host/include/python3.9/Python.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
-
-
-
 
 PyObject *pName, *pModule, *pDict; 
 

@@ -3,6 +3,9 @@
 #include <unistd.h>
 #include <fcntl.h>
 
+
+typedef enum {relayON = 0 , relayOFF } relayStatus_t;
+
 void simpleDelay (void)
 {
     volatile unsigned int i;
@@ -29,7 +32,7 @@ int main(void)
     int fd0 = open("/dev/relay0", O_RDWR);
     char ledOn = '1';
     char ledOff = '0';
-    char pBuff;
+    relayStatus_t pBuff;
 
 
     printf("\n Testing Output relay (2 times): \n");
@@ -37,7 +40,12 @@ int main(void)
     while(count != 2)
     {
         
-        write(fd0, &ledOn, 1);
+        if (write(fd0, &ledOn, 1) != 1 )
+        {
+            printf ("ERROR");
+            close(fd0);
+            return -1;
+        }
         printf("Relay ON! \n ");
         read(fd0, &pBuff, 1);
         printf("Relay Value: %c \n", pBuff);

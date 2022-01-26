@@ -135,7 +135,7 @@ ssize_t relay_device_read(struct file *pfile, char __user *pbuff,size_t len, lof
 	copy_to_user(pbuff, buffer, 1);
 	printk(KERN_INFO "PIN -> %d\n", i);
 
-	return 0;
+	return len;
 
 }
 

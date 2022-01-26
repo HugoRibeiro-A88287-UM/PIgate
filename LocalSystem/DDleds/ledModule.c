@@ -227,7 +227,7 @@ ssize_t ledRGB_device_read(struct file *pfile, char __user *pbuff,size_t len, lo
 	copy_to_user(pbuff, buffer, 1);
 	printk(KERN_INFO "Pwm State read ");
 
-	return 0;
+	return len;
 
 }
 
