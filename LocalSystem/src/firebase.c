@@ -4,7 +4,7 @@
 #include <string.h>
 #include <errno.h>
 #include <sys/syslog.h>
-
+#include "/home/hugo/Downloads/buildroot-2021.02.5/output/host/include/python3.9/Python.h"
 
 PyObject *pDict = NULL; 
 

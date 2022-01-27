@@ -1,0 +1,10 @@
+{
+    "files.associations": {
+        "stdlib.h": "c",
+        "time.h": "c",
+        "fcntl.h": "c",
+        "errno.h": "c",
+        "errno-base.h": "c",
+        "sched.h": "c"
+    }
+}
