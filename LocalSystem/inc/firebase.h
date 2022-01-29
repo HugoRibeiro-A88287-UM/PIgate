@@ -1,7 +1,7 @@
 #ifndef FIREBASE_H
 #define FIREBASE_H
 
-int initFirebase(void);
+
 
 void remFirebase(void);
 

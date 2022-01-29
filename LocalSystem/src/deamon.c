@@ -15,6 +15,9 @@
 #include <sys/mman.h>
 #include <sys/shm.h>
 #include <sched.h>
+
+#include "../inc/utilits.h"
+#include "../inc/firebase.h"
 #include "../inc/daemon.h"
 
 pid_t parentPID;
@@ -41,11 +44,12 @@ static void entriesDB(void)
 {
 
     signal(SIGTERM, signalHandler);
+    syslog(LOG_INFO, "entriesDB is ON \n");
 
     while (1)
     {
         sleep(5);
-        syslog(LOG_INFO, "entriesDB is ON \n");
+        
     }
     
 
@@ -55,21 +59,30 @@ static void updatePlates(void)
 {
     signal(SIGTERM, signalHandler);
 
+    syslog(LOG_INFO, "updatePlate is ON \n");
+
     while (1)
     {
-        sleep(5);
-        syslog(LOG_INFO, "updatePlate is ON \n");
+        
+        syslog(LOG_INFO, "update Done \n");
+
+        receivePlates();
+
+        sleep(30);
+
     }
 }
 
 static void openGateDB(void)
 {
     signal(SIGTERM, signalHandler);
+    syslog(LOG_INFO, "openGateDB is ON \n");
+
 
     while (1)
     {
         sleep(5);
-        syslog(LOG_INFO, "openGateDB is ON \n");
+        
     }
 }
 
@@ -124,8 +137,6 @@ pid_t initDaemonEntriesDB(void)
     close(STDOUT_FILENO); // close standard output file descriptor
     close(STDERR_FILENO); // close standard error file descriptor
 
-    syslog(LOG_INFO, "Parent PID: %d \n",parentPID);
-    syslog(LOG_INFO, "Deamon PID: %d \n",getpid());
 
     entriesDB();
 
@@ -183,8 +194,6 @@ pid_t initDaemonUpdatePlate(void)
     close(STDOUT_FILENO); // close standard output file descriptor
     close(STDERR_FILENO); // close standard error file descriptor
 
-    syslog(LOG_INFO, "Parent PID: %d \n",parentPID);
-    syslog(LOG_INFO, "Deamon PID: %d \n",getpid());
 
     updatePlates();
 
@@ -242,9 +251,6 @@ pid_t initDaemonOpenGateDB(void)
     close(STDIN_FILENO);  // close standard input file descriptor
     close(STDOUT_FILENO); // close standard output file descriptor
     close(STDERR_FILENO); // close standard error file descriptor
-
-    syslog(LOG_INFO, "Parent PID: %d \n",parentPID);
-    syslog(LOG_INFO, "Deamon PID: %d \n",getpid());
 
     openGateDB();
 

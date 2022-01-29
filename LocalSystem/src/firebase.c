@@ -1,55 +1,24 @@
-#include "../inc/firebase.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
 #include <sys/syslog.h>
 #include "/home/hugo/Downloads/buildroot-2021.02.5/output/host/include/python3.9/Python.h"
+#include "../inc/utilits.h"
+#include "../inc/firebase.h"
 
-PyObject *pDict = NULL; 
+PyObject *pName, *pModule, *pDict ; 
 
-int initFirebase(void)
-{
-    PyObject *pName, *pModule;
 
-    // Set PYTHONPATH TO working directory
-    setenv("PYTHONPATH",".",1);
-    
-    // Initialize the Python Interpreter
-    Py_Initialize();
-
-    // Build the name object
-    pName = PyUnicode_FromString((char*)"firebase");
-
-    // Load the module object
-    pModule = PyImport_Import(pName);
-
-    if(pModule == NULL)
-    {
-        syslog(LOG_ERR,"No firebase.py available!\n" );
-        return -EXIT_FAILURE;
-    }
-
-    // pDict is a borrowed reference 
-    pDict = PyModule_GetDict(pModule);
-
-    //Cleanup
-    Py_XDECREF(pName);
-    Py_XDECREF(pModule);
-
-    return EXIT_SUCCESS;
-}
-
-void remFirebase(void)
+void clearFirebase(void)
 {
 
     //Cleanup
     Py_XDECREF(pDict);
+    Py_XDECREF(pName);
+    Py_XDECREF(pModule);
 
-    // Finish the Python Interpreter
-    Py_Finalize();
-
-    return EXIT_SUCCESS;
+    return;
 }
 
 int sendEntry(const char* PIgate_ID, const char* Plate)
@@ -70,10 +39,8 @@ int sendEntry(const char* PIgate_ID, const char* Plate)
         {
             syslog(LOG_WARNING,"Entry not sent \n" );
             PyErr_Print();
-            Py_XDECREF(pDict);
             Py_XDECREF(pFunc);
             Py_XDECREF(presult);
-            Py_Finalize();
             return -EXIT_FAILURE;
         }
    } 
@@ -82,9 +49,7 @@ int sendEntry(const char* PIgate_ID, const char* Plate)
         syslog(LOG_ERR,"Python sendEntry function is broken!\n" );
         PyErr_Print();
         Py_XDECREF(pFunc);
-        Py_XDECREF(pDict);
-        Py_XDECREF(presult);
-        Py_Finalize();
+        Py_XDECREF(presult);;
         return -EXIT_FAILURE;
    }
 
@@ -99,63 +64,81 @@ int sendEntry(const char* PIgate_ID, const char* Plate)
 int receivePlates(void)
 {
     PyObject *pFunc,*presult;
+    PyObject *presultString, *encodedString;
     int presult_length;
+    static int firstTime = 1;
+    char platesSize[PLATESSIZE+1];
 
-    if(pDict == NULL)
+    if(firstTime)
+    {
+        close(recPlatePIPE[0]); // Close reading end 
+        firstTime = 0;
+
+    }
+
+    // Set PYTHONPATH TO working directory
+    setenv("PYTHONPATH","/etc/",1);
+
+    // Initialize the Python Interpreter
+    Py_Initialize();
+
+    // Build the name object
+    pName = PyUnicode_FromString((char*)"firebase");
+
+    // Load the module object
+    pModule = PyImport_Import(pName);
+
+    if(pModule == NULL)
+    {
+        syslog(LOG_ERR,"No firebase.py available!\n" );
         return -EXIT_FAILURE;
+    }
 
+    // pDict is a borrowed reference 
+    pDict = PyModule_GetDict(pModule);
+        
+    
     pFunc = PyDict_GetItemString(pDict, (char*)"getPlates");
-
 
     if (PyCallable_Check(pFunc))
     {
+
         presult = PyObject_CallFunction(pFunc,NULL);
 
         if( (int)PyLong_AsLong(presult) == EINVAL )
         {
             syslog(LOG_WARNING,"Plates not Received\n" );
-            Py_XDECREF(pDict);
-            Py_XDECREF(pFunc);
-            Py_XDECREF(presult);
-            Py_Finalize();
             return -EXIT_FAILURE;
         }
     }
     else 
     {
         syslog(LOG_ERR,"Python getPlates function is broken!\n" );
-        PyErr_Print();
-        Py_XDECREF(pDict);
-        Py_XDECREF(pFunc);
-        Py_XDECREF(presult);
-        Py_Finalize();
         return -EXIT_FAILURE;
     }
 
-    
+
     presult_length = PyObject_Length(presult);
 
-    PyObject *presultString, *encodedString;
+    //Insert length in PIPE
+    sprintf(platesSize, "%d", presult_length);   
+    write(recPlatePIPE[1],platesSize,4);
 
     for(int i = 0; i < presult_length ; i++)
     {
         presultString = PyList_GetItem(presult,i);
         encodedString = PyUnicode_AsEncodedString(presultString, "UTF-8", "strict");
 
-        //Insert length in PIPE
-
         if (encodedString) 
         { //returns NULL if an exception was raised
-            char *plates = PyBytes_AsString(encodedString); //pointer refers to the internal buffer of encodedString
-        
-            if(plates) 
-            {
-                //Insert IN PIPE
-            }
-            else
-            {
-                syslog(LOG_WARNING,"Plates pointer is NULL\n" );
-            }   
+            //char *plates = PyBytes_AsString(encodedString); //pointer refers to the internal buffer of encodedString
+
+            strcpy(platesSize,PyBytes_AsString(encodedString));
+
+            syslog(LOG_INFO, "Plate: %s \n", platesSize );
+
+            write(recPlatePIPE[1],(const) platesSize, (PLATESSIZE+1) );
+
         }
         else
         {
@@ -163,11 +146,6 @@ int receivePlates(void)
         }
     }
 
-    //Cleanup
-    Py_XDECREF(pFunc);
-    Py_XDECREF(presult);
-    Py_XDECREF(presultString);
-    Py_XDECREF(encodedString);
 
     return EXIT_SUCCESS;
 }
@@ -194,10 +172,8 @@ int isToOpen(void)
         if( (int)PyLong_AsLong(presult) == EINVAL )
         {
             syslog(LOG_WARNING,"Error in checkIsToOpen \n" );
-            Py_XDECREF(pDict);
             Py_XDECREF(pFunc);
             Py_XDECREF(presult);
-            Py_Finalize();
             return -EXIT_FAILURE;
         }
 
@@ -208,11 +184,9 @@ int isToOpen(void)
     else 
     {
         syslog(LOG_ERR,"Python checkIsToOpen function is broken!\n" );
-        PyErr_Print();
-        Py_XDECREF(pDict);
+        PyErr_Print();;
         Py_XDECREF(pFunc);
         Py_XDECREF(presult);
-        Py_Finalize();
         return -EXIT_FAILURE;
     }
 

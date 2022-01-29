@@ -17,12 +17,15 @@
 
 #include"../inc/utilits.h"
 #include "../inc/daemon.h"
+#include "../inc/firebase.h"
+
 
 pid_t daemonEntriesDB, daemonUpdatePlate, daemonOpenGateDB;
 
+
+
 //Thread Priority
 static enum mainProcessPrio {captureCutImagePrio = 2, plateRecognitionPrio, textRecognitionPrio, updatePlatePrio, plateValidationPrio};
-
 
 //Threads Functions Prototypes
 void *t_captureCutImage(void *arg);
@@ -31,11 +34,16 @@ void *t_textRecognition(void *arg);
 void *t_updatePlate(void *arg);
 void *t_plateValidation(void *arg);
 
+
+//Plates buffer
+char platesBuffer[PLATESLEN][PLATESSIZE];
+
 static void signalHandler(int signo)
 {		
     switch (signo)
     {
         case SIGINT:
+        case SIGTERM:
 
             printf("Killing Deamon \n");
             kill(daemonEntriesDB,SIGTERM);
@@ -54,25 +62,21 @@ static void signalHandler(int signo)
 
 int main(int argc, char *argv[])
 {
+    //Create PIPE
+
+    if(pipe(recPlatePIPE) < 0)
+    {
+        printf("Error in recPlatePIPE creation");
+        exit(1);
+    }
+
+
 
     daemonEntriesDB = initDaemonEntriesDB();
-
-    printf("Main PID -> %d \n", getpid());
-    printf("Daemon PID -> %d \n", daemonEntriesDB);
-
     daemonUpdatePlate = initDaemonUpdatePlate();
-
-    printf("Main PID -> %d \n", getpid());
-    printf("Daemon PID -> %d \n", daemonUpdatePlate);
-
     daemonOpenGateDB = initDaemonOpenGateDB();
 
-    printf("Main PID -> %d \n", getpid());
-    printf("Daemon PID -> %d \n", daemonOpenGateDB);
-
-
     signal(SIGINT, signalHandler);
-
 
 
     /*Threads Creation*/
@@ -117,13 +121,15 @@ int main(int argc, char *argv[])
 
 void *t_captureCutImage(void *arg)
 {
-
+    
+    printf("I took a photo! \n");
+    
     while (1)
     {
         
-        sleep(5);
-        printf("I took a photo! \n");
-
+        sleep(16);
+        
+        system("ps -A |grep ./daemon");
 
     }
     
@@ -133,10 +139,12 @@ void *t_captureCutImage(void *arg)
 void *t_plateRecognition(void *arg)
 {
 
+    printf("OMG! There is a plate \n");
+
     while (1)
     {
         sleep(5);
-        printf("OMG! There is a plate \n");
+        
     }
     
 
@@ -144,11 +152,12 @@ void *t_plateRecognition(void *arg)
 
 void *t_textRecognition(void *arg)
 {
+    printf("I detect the plate's text! \n");
 
     while (1)
     {
         sleep(5);
-        printf("I detect the plate's text! \n");
+        
     }
     
 
@@ -156,11 +165,37 @@ void *t_textRecognition(void *arg)
 
 void *t_updatePlate(void *arg)
 {
+    printf("Plates were updated \n");
+
+    const int inBuffSize = PLATESSIZE+1;
+    char inBuff[inBuffSize];
+    int platesLen = 0;
+
+    close(recPlatePIPE[1]); // Close writing end 
 
     while (1)
     {
-        sleep(5);
-        printf("Plates were updated \n");
+        sleep(7);
+
+        while( read(recPlatePIPE[0] , inBuff, inBuffSize) < 1 )
+        {}
+
+        
+        platesLen = atoi(inBuff);
+
+        printf("plates Size: %d\n", platesLen);
+
+        for(int i = 0 ; i < platesLen ; i++)
+        {
+            read(recPlatePIPE[0] , inBuff, inBuffSize);
+            
+            removeHiffen(inBuff, inBuffSize);
+
+            strcpy(platesBuffer[i] , inBuff);
+
+            printf("Storage Plate: %s \n", platesBuffer[i] );
+        }
+        
     }
     
 
@@ -168,11 +203,12 @@ void *t_updatePlate(void *arg)
 
 void *t_plateValidation(void *arg)
 {
+    printf("Plate is VALID! \n");
 
     while (1)
     {
         sleep(5);
-        printf("Plate is VALID! \n");
+        
     }
     
 

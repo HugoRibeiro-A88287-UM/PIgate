@@ -151,10 +151,10 @@ void ReceivePlates(void)
 
     //Cleanup
     
-    Py_XDECREF(pFunc);
-    Py_XDECREF(presult);
-    Py_XDECREF(presultString);
-    Py_XDECREF(encodedString);
+    Py_CLEAR(pFunc);
+    Py_CLEAR(presult);
+    Py_CLEAR(presultString);
+    Py_CLEAR(encodedString);
 }
 
 void isToOpen(void)
@@ -208,7 +208,9 @@ void isToOpen(void)
 
 int main()
 {
-
+    while (1)
+    {
+    
     // Set PYTHONPATH TO working directory
     setenv("PYTHONPATH",".",1);
     
@@ -230,23 +232,29 @@ int main()
     // pDict is a borrowed reference 
    pDict = PyModule_GetDict(pModule);
 
-    //Cleanup
-    Py_XDECREF(pName);
-    Py_XDECREF(pModule);
-    
+
     //initFirebase();
-    sendEntry();
-    sleep(2);
+    // sendEntry();
+    // sleep(2);
     ReceivePlates();
+    
+    
     // sleep(2);
     // isToOpen();
 
     //Cleanup
-    Py_XDECREF(pDict);
+    
 
     // Finish the Python Interpreter
     Py_Finalize();
 
+    sleep(30);
+
+    }
+
+    Py_XDECREF(pName);
+    Py_XDECREF(pModule);
+    Py_XDECREF(pDict);
 
     return 0;
 }

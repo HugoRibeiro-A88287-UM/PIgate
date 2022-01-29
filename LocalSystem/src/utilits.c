@@ -2,6 +2,7 @@
 #include <sys/syslog.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 
 #include "../inc/utilits.h"
 
@@ -30,4 +31,25 @@ void checkFail(int status)
         syslog(LOG_ERR, "pthread_create() got error %d\n",status);
         exit(1);    		
   	}
+}
+
+void removeHiffen(char* buffer, int len)
+{
+
+    char auxBuffer[len];
+    char * token = strtok(buffer, "-");
+    
+    //Clear Buffer
+    strcpy(auxBuffer,"");
+
+    // loop through the string to extract all other tokens
+   while( token != NULL ) 
+   {
+        strcat(auxBuffer,token);
+        token = strtok(NULL, "-");
+   }
+
+    //Hiffens removed
+    strcpy(buffer,auxBuffer);
+
 }

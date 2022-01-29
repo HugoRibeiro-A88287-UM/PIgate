@@ -2,7 +2,7 @@ CCRASP = arm-buildroot-linux-gnueabihf-gcc
 
 CFLAGS = -g -I. 
 
-DEPS = -pthread -lrt
+DEPS = -pthread -lrt -lpython3.9
 
 RASPIP = 10.42.0.74
 
@@ -11,7 +11,7 @@ SRCFLODER =
 
 .PHONY: all
 all:
-	$(CCRASP) src/main.c src/deamon.c src/utilits.c -o daemonTest.elf $(DEPS)
+	$(CCRASP) src/main.c src/deamon.c src/utilits.c src/firebase.c -o daemonTest.elf $(DEPS)
 	scp daemonTest.elf root@$(RASPIP):/etc
 	 
 
