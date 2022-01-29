@@ -8,10 +8,9 @@
 #include "../inc/firebase.h"
 
 
-int sendEntry(const char* PIgate_ID, const char* Plate)
+static PyObject* get_pDict(void)
 {
     PyObject *pName, *pModule, *pDict ; 
-    PyObject *pFunc,*presult;
 
     // Set PYTHONPATH TO working directory
     setenv("PYTHONPATH","/etc/",1);
@@ -28,19 +27,29 @@ int sendEntry(const char* PIgate_ID, const char* Plate)
     if(pModule == NULL)
     {
         syslog(LOG_ERR,"No firebase.py available!\n" );
-        return -EXIT_FAILURE;
+        return NULL;
     }
 
     // pDict is a borrowed reference 
     pDict = PyModule_GetDict(pModule);
 
+    return pDict;
+
+}
+
+int sendEntry(const char* PIgate_ID, const char* Plate)
+{
+    PyObject *pFunc,*presult, *pDict;
+
+    pDict = get_pDict();
+        
     if(pDict == NULL)
     {
-        syslog(LOG_ERR,"pDict is pointing to NULL \n" );
+        syslog(LOG_ERR," get_pDict not succeed \n" );
         return -EXIT_FAILURE;
-    }
-        
+    }  
 
+    
     pFunc = PyDict_GetItemString(pDict, (char*)"sendEntry");
 
     if (PyCallable_Check(pFunc))
@@ -68,8 +77,7 @@ int sendEntry(const char* PIgate_ID, const char* Plate)
 
 int receivePlates(void)
 {
-    PyObject *pName, *pModule, *pDict ; 
-    PyObject *pFunc,*presult;
+    PyObject *pFunc,*presult, *pDict;
     PyObject *presultString, *encodedString;
     int presult_length;
     static int firstTime = 1;
@@ -81,30 +89,14 @@ int receivePlates(void)
         firstTime = 0;
 
     }
-
-    // Set PYTHONPATH TO working directory
-    setenv("PYTHONPATH","/etc/",1);
-
-    // Initialize the Python Interpreter
-    Py_Initialize();
-
-    // Build the name object
-    pName = PyUnicode_FromString((char*)"firebase");
-
-    // Load the module object
-    pModule = PyImport_Import(pName);
-
-    if(pDict == NULL)
-    {
-        syslog(LOG_ERR,"pDict is pointing to NULL \n" );
-        return -EXIT_FAILURE;
-    }
-
-    // pDict is a borrowed reference 
-    pDict = PyModule_GetDict(pModule);
+    
+    pDict = get_pDict();
         
     if(pDict == NULL)
-        return -EXIT_FAILURE;    
+    {
+        syslog(LOG_ERR," get_pDict not succeed \n" );
+        return -EXIT_FAILURE;
+    }   
     
     pFunc = PyDict_GetItemString(pDict, (char*)"getPlates");
 
@@ -160,35 +152,17 @@ int receivePlates(void)
 
 int isToOpen(const char* PIgate_ID)
 {
-    PyObject *pName, *pModule, *pDict ; 
-    PyObject *pFunc,*presult;
+    PyObject *pFunc,*presult, *pDict;
     int presult_length;
     int isToOpen = 0;
 
-    // Set PYTHONPATH TO working directory
-    setenv("PYTHONPATH","/etc/",1);
-
-    // Initialize the Python Interpreter
-    Py_Initialize();
-
-    // Build the name object
-    pName = PyUnicode_FromString((char*)"firebase");
-
-    // Load the module object
-    pModule = PyImport_Import(pName);
-
-    if(pModule == NULL)
-    {
-        syslog(LOG_ERR,"No firebase.py available!\n" );
-        return -EXIT_FAILURE;
-    }
-
+    
     // pDict is a borrowed reference 
-    pDict = PyModule_GetDict(pModule);
+    pDict = get_pDict();
 
     if(pDict == NULL)
     {
-        syslog(LOG_ERR,"pDict is pointing to NULL \n" );
+        syslog(LOG_ERR," get_pDict not succeed \n" );
         return -EXIT_FAILURE;
     }
 

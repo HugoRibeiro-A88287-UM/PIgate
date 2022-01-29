@@ -6,7 +6,6 @@
 #include <errno.h>
 #include <stdio.h>
 #include <string.h>
-#include <mqueue.h> 
 #include <sys/mman.h>
 #include <sys/shm.h>
 #include <sys/stat.h>
@@ -14,6 +13,7 @@
 #include <signal.h>
 #include <sys/time.h>
 #include <string.h>
+#include <stdbool.h>
 
 #include"../inc/utilits.h"
 #include "../inc/daemon.h"
@@ -21,6 +21,12 @@
 
 
 pid_t daemonEntriesDB, daemonUpdatePlate, daemonOpenGateDB;
+
+
+
+char whitelistPlates[MAXPLATESLEN][PLATESSIZE];
+int PLATESLEN = 0;
+pthread_mutex_t updatePlatesMutex = PTHREAD_MUTEX_INITIALIZER; // Mutex for whitelistPlates buffer
 
 
 
@@ -35,8 +41,7 @@ void *t_updatePlate(void *arg);
 void *t_plateValidation(void *arg);
 
 
-//Plates buffer
-char whitelistPlates[PLATESLEN][PLATESSIZE];
+
 
 static void signalHandler(int signo)
 {		
@@ -168,27 +173,23 @@ void *t_textRecognition(void *arg)
 
 void *t_updatePlate(void *arg)
 {
-    printf("Plates were updated \n");
-
     const int inBuffSize = PLATESSIZE+1;
     char inBuff[inBuffSize];
-    int platesLen = 0;
 
     close(recPlatePIPE[1]); // Close writing end 
 
     while (1)
     {
-        sleep(7);
+        
 
         while( read(recPlatePIPE[0] , inBuff, inBuffSize) < 1 )
         {}
 
-        
-        platesLen = atoi(inBuff);
+        pthread_mutex_lock(&updatePlatesMutex);
 
-        printf("plates Size: %d\n", platesLen);
+        PLATESLEN = atoi(inBuff);
 
-        for(int i = 0 ; i < platesLen ; i++)
+        for(int i = 0 ; i < PLATESLEN ; i++)
         {
             read(recPlatePIPE[0] , inBuff, inBuffSize);
 
@@ -198,6 +199,10 @@ void *t_updatePlate(void *arg)
 
             printf("Storage Plate: %s \n", whitelistPlates[i] );
         }
+
+        pthread_mutex_unlock(&updatePlatesMutex);
+        
+        sleep(7);
         
     }
     
@@ -206,27 +211,42 @@ void *t_updatePlate(void *arg)
 
 void *t_plateValidation(void *arg)
 {
-    const int outBuffSize = PLATESSIZE+1;
-    char outBuff[outBuffSize];
-    close(entriesDBPIPE[0]); // Close reading end 
 
-    printf("Plate is VALID! \n");
+    close(entriesDBPIPE[0]); // Close reading end
+    bool whitelistPlate = false; 
+
+    const char foundedPlate[] = "AA0002";
 
     while (1)
     {
-        sleep(5);
 
-        printf("The plate AA-00-01 Arrived ! \n");
+        pthread_mutex_lock(&updatePlatesMutex);
 
-        strcpy(outBuff,"AA0001");
+        for(int i = 0 ; i < PLATESLEN && whitelistPlate == false ; i++)
+        {
+            whitelistPlate = ( strcmp(foundedPlate,whitelistPlates[i]) == 0);
+        }
 
-        insertHiffen(outBuff,outBuffSize);
+        pthread_mutex_unlock(&updatePlatesMutex);
 
-        write(entriesDBPIPE[1], outBuff, PLATESSIZE);
+        if(whitelistPlate)
+        {
 
-        printf("Write Done \n ");
+            insertHiffen(foundedPlate,strlen(foundedPlate));
 
+            write(entriesDBPIPE[1], foundedPlate, strlen(foundedPlate));
+
+            whitelistPlate = false;
+
+            printf(" GOOD PLATE \n ");
+        }
+        else
+        {
+            printf(" BAD PLATE \n ");
+        }
+        
         sleep(30);
+
     }
     
 

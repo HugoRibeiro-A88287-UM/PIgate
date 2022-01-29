@@ -3,7 +3,7 @@
 
 #include <pthread.h>
 
-#define PLATESLEN 512
+#define MAXPLATESLEN 512
 #define PLATESSIZE 8
 #define PIGATE_ID "1"
 
