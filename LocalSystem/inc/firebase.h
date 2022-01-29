@@ -2,13 +2,10 @@
 #define FIREBASE_H
 
 
-
-void remFirebase(void);
-
 int sendEntry(const char* PIgate_ID, const char* Plate);
 
 int receivePlates(void);
 
-int isToOpen(void);
+int isToOpen(const char* PIgate_ID);
 
 #endif //FIREBASE_H

@@ -42,13 +42,22 @@ static void signalHandler(int signo)
 
 static void entriesDB(void)
 {
+    const int inBuffSize = PLATESSIZE+1;
+    char inBuff[inBuffSize];
 
     signal(SIGTERM, signalHandler);
     syslog(LOG_INFO, "entriesDB is ON \n");
 
+    close(entriesDBPIPE[1]); // Close writing end 
+
     while (1)
     {
         sleep(5);
+
+        while( read(entriesDBPIPE[0] , inBuff, inBuffSize) < 1 )
+        {}
+
+        sendEntry(PIGATE_ID, inBuff);
         
     }
     
@@ -81,7 +90,9 @@ static void openGateDB(void)
 
     while (1)
     {
-        sleep(5);
+        sleep(20);
+
+        syslog(LOG_INFO, "isToOpen Recevied: %d \n", isToOpen(PIGATE_ID));
         
     }
 }
@@ -137,10 +148,9 @@ pid_t initDaemonEntriesDB(void)
     close(STDOUT_FILENO); // close standard output file descriptor
     close(STDERR_FILENO); // close standard error file descriptor
 
-
     entriesDB();
 
-    return;
+    return -EXIT_FAILURE;
 }
 
 pid_t initDaemonUpdatePlate(void)
@@ -197,7 +207,7 @@ pid_t initDaemonUpdatePlate(void)
 
     updatePlates();
 
-    return;
+    return -EXIT_FAILURE;
 
 }
 
@@ -254,5 +264,5 @@ pid_t initDaemonOpenGateDB(void)
 
     openGateDB();
 
-    return;
+    return -EXIT_FAILURE;
 }

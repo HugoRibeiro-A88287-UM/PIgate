@@ -36,7 +36,7 @@ void *t_plateValidation(void *arg);
 
 
 //Plates buffer
-char platesBuffer[PLATESLEN][PLATESSIZE];
+char whitelistPlates[PLATESLEN][PLATESSIZE];
 
 static void signalHandler(int signo)
 {		
@@ -44,8 +44,6 @@ static void signalHandler(int signo)
     {
         case SIGINT:
         case SIGTERM:
-
-            printf("Killing Deamon \n");
             kill(daemonEntriesDB,SIGTERM);
             kill(daemonUpdatePlate,SIGTERM);
             kill(daemonOpenGateDB,SIGTERM);
@@ -62,7 +60,7 @@ static void signalHandler(int signo)
 
 int main(int argc, char *argv[])
 {
-    //Create PIPE
+    //Create PIPEs
 
     if(pipe(recPlatePIPE) < 0)
     {
@@ -70,6 +68,11 @@ int main(int argc, char *argv[])
         exit(1);
     }
 
+    if(pipe(entriesDBPIPE) < 0)
+    {
+        printf("Error in entriesDBPIPE creation");
+        exit(1);
+    }
 
 
     daemonEntriesDB = initDaemonEntriesDB();
@@ -188,12 +191,12 @@ void *t_updatePlate(void *arg)
         for(int i = 0 ; i < platesLen ; i++)
         {
             read(recPlatePIPE[0] , inBuff, inBuffSize);
-            
+
             removeHiffen(inBuff, inBuffSize);
 
-            strcpy(platesBuffer[i] , inBuff);
+            strcpy(whitelistPlates[i] , inBuff);
 
-            printf("Storage Plate: %s \n", platesBuffer[i] );
+            printf("Storage Plate: %s \n", whitelistPlates[i] );
         }
         
     }
@@ -203,12 +206,27 @@ void *t_updatePlate(void *arg)
 
 void *t_plateValidation(void *arg)
 {
+    const int outBuffSize = PLATESSIZE+1;
+    char outBuff[outBuffSize];
+    close(entriesDBPIPE[0]); // Close reading end 
+
     printf("Plate is VALID! \n");
 
     while (1)
     {
         sleep(5);
-        
+
+        printf("The plate AA-00-01 Arrived ! \n");
+
+        strcpy(outBuff,"AA0001");
+
+        insertHiffen(outBuff,outBuffSize);
+
+        write(entriesDBPIPE[1], outBuff, PLATESSIZE);
+
+        printf("Write Done \n ");
+
+        sleep(30);
     }
     
 

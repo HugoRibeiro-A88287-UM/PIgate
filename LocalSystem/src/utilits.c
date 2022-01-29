@@ -53,3 +53,27 @@ void removeHiffen(char* buffer, int len)
     strcpy(buffer,auxBuffer);
 
 }
+
+void insertHiffen(char* buffer, int len)
+{
+    const int plateCharacterNumber = 6;
+    char auxBuffer[len];
+    char str[2] = "\0";
+
+    //Clear Buffer
+    strcpy(auxBuffer,"");
+
+    //Plate format with Hiffen
+
+    for(int i = 0 ; i < plateCharacterNumber ; i ++ )
+    {
+        str[0] = buffer[i];
+        strcat(auxBuffer,str);
+        if((i+1) % 2 == 0 && i < (plateCharacterNumber-1) )
+            strcat(auxBuffer,"-");
+
+    }
+
+    //Copy the new buffer
+    strcpy(buffer,auxBuffer);
+}

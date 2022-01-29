@@ -7,62 +7,68 @@
 #include "../inc/utilits.h"
 #include "../inc/firebase.h"
 
-PyObject *pName, *pModule, *pDict ; 
-
-
-void clearFirebase(void)
-{
-
-    //Cleanup
-    Py_XDECREF(pDict);
-    Py_XDECREF(pName);
-    Py_XDECREF(pModule);
-
-    return;
-}
 
 int sendEntry(const char* PIgate_ID, const char* Plate)
 {
+    PyObject *pName, *pModule, *pDict ; 
     PyObject *pFunc,*presult;
 
-    if(pDict == NULL)
+    // Set PYTHONPATH TO working directory
+    setenv("PYTHONPATH","/etc/",1);
+
+    // Initialize the Python Interpreter
+    Py_Initialize();
+
+    // Build the name object
+    pName = PyUnicode_FromString((char*)"firebase");
+
+    // Load the module object
+    pModule = PyImport_Import(pName);
+
+    if(pModule == NULL)
+    {
+        syslog(LOG_ERR,"No firebase.py available!\n" );
         return -EXIT_FAILURE;
+    }
+
+    // pDict is a borrowed reference 
+    pDict = PyModule_GetDict(pModule);
+
+    if(pDict == NULL)
+    {
+        syslog(LOG_ERR,"pDict is pointing to NULL \n" );
+        return -EXIT_FAILURE;
+    }
+        
 
     pFunc = PyDict_GetItemString(pDict, (char*)"sendEntry");
 
     if (PyCallable_Check(pFunc))
     {       
+        syslog(LOG_INFO,"Received info: %s \n %s \n", PIgate_ID, Plate);
 
         presult = PyObject_CallFunction(pFunc,"ss",PIgate_ID,Plate);
 
         if( (int)PyLong_AsLong(presult) == EINVAL )
         {
             syslog(LOG_WARNING,"Entry not sent \n" );
-            PyErr_Print();
-            Py_XDECREF(pFunc);
-            Py_XDECREF(presult);
             return -EXIT_FAILURE;
         }
    } 
    else 
    {
         syslog(LOG_ERR,"Python sendEntry function is broken!\n" );
-        PyErr_Print();
-        Py_XDECREF(pFunc);
-        Py_XDECREF(presult);;
         return -EXIT_FAILURE;
    }
 
-    //Cleanup
-   
-    Py_XDECREF(pFunc);
-    Py_XDECREF(presult);
+    syslog(LOG_INFO, "Entry sent ! :D");
 
     return EXIT_SUCCESS;
 }
 
 int receivePlates(void)
 {
+    PyObject *pName, *pModule, *pDict ; 
     PyObject *pFunc,*presult;
     PyObject *presultString, *encodedString;
     int presult_length;
@@ -88,15 +94,17 @@ int receivePlates(void)
     // Load the module object
     pModule = PyImport_Import(pName);
 
-    if(pModule == NULL)
+    if(pDict == NULL)
     {
-        syslog(LOG_ERR,"No firebase.py available!\n" );
+        syslog(LOG_ERR,"pDict is pointing to NULL \n" );
         return -EXIT_FAILURE;
     }
 
     // pDict is a borrowed reference 
     pDict = PyModule_GetDict(pModule);
         
+    if(pDict == NULL)
+        return -EXIT_FAILURE;    
     
     pFunc = PyDict_GetItemString(pDict, (char*)"getPlates");
 
@@ -137,7 +145,7 @@ int receivePlates(void)
 
             syslog(LOG_INFO, "Plate: %s \n", platesSize );
 
-            write(recPlatePIPE[1],(const) platesSize, (PLATESSIZE+1) );
+            write(recPlatePIPE[1], platesSize, (PLATESSIZE+1) );
 
         }
         else
@@ -150,51 +158,63 @@ int receivePlates(void)
     return EXIT_SUCCESS;
 }
 
-int isToOpen(void)
+int isToOpen(const char* PIgate_ID)
 {
+    PyObject *pName, *pModule, *pDict ; 
     PyObject *pFunc,*presult;
-    PyObject *presultString;
     int presult_length;
     int isToOpen = 0;
 
-    if(pDict == NULL)
+    // Set PYTHONPATH TO working directory
+    setenv("PYTHONPATH","/etc/",1);
+
+    // Initialize the Python Interpreter
+    Py_Initialize();
+
+    // Build the name object
+    pName = PyUnicode_FromString((char*)"firebase");
+
+    // Load the module object
+    pModule = PyImport_Import(pName);
+
+    if(pModule == NULL)
+    {
+        syslog(LOG_ERR,"No firebase.py available!\n" );
         return -EXIT_FAILURE;
+    }
+
+    // pDict is a borrowed reference 
+    pDict = PyModule_GetDict(pModule);
+
+    if(pDict == NULL)
+    {
+        syslog(LOG_ERR,"pDict is pointing to NULL \n" );
+        return -EXIT_FAILURE;
+    }
 
     pFunc = PyDict_GetItemString(pDict, (char*)"checkIsToOpen");
 
 
     if (PyCallable_Check(pFunc))
     {
-        const char* aux = "1";
-
-        presult = PyObject_CallFunction(pFunc,"s", aux);
+        
+        presult = PyObject_CallFunction(pFunc,"s", PIgate_ID);
 
         if( (int)PyLong_AsLong(presult) == EINVAL )
         {
             syslog(LOG_WARNING,"Error in checkIsToOpen \n" );
-            Py_XDECREF(pFunc);
-            Py_XDECREF(presult);
             return -EXIT_FAILURE;
         }
 
         isToOpen = (int)PyLong_AsLong(presult);
-        syslog(LOG_INFO, " \n The isToOpen Variavel is:  %d \n ", isToOpen);
         
     }
     else 
     {
         syslog(LOG_ERR,"Python checkIsToOpen function is broken!\n" );
-        PyErr_Print();;
-        Py_XDECREF(pFunc);
-        Py_XDECREF(presult);
         return -EXIT_FAILURE;
     }
 
     //Cleanup
-    
-    Py_XDECREF(pFunc);
-    Py_XDECREF(presult);
-    Py_XDECREF(presultString);
-
     return isToOpen;
 }
