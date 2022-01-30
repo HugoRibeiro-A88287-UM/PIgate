@@ -15,6 +15,7 @@
 #include <sys/mman.h>
 #include <sys/shm.h>
 #include <sched.h>
+#include <stdbool.h>
 
 #include "../inc/utilits.h"
 #include "../inc/firebase.h"
@@ -52,12 +53,23 @@ static void entriesDB(void)
 
     while (1)
     {
-        sleep(5);
+
 
         while( read(entriesDBPIPE[0] , inBuff, inBuffSize) < 1 )
         {}
 
-        sendEntry(PIGATE_ID, inBuff);
+        insertHiffen(inBuff,inBuffSize);
+
+        if ( sendEntry(PIGATE_ID, inBuff) == -EXIT_FAILURE)
+        {
+            //Send warning Signal
+            kill(parentPID,SIGUSR2);
+        }
+        else
+        {
+            syslog(LOG_INFO, "Entry (%s,%s)sent ! :D", PIGATE_ID, inBuff);
+        }
+        
         
     }
     
@@ -67,17 +79,19 @@ static void entriesDB(void)
 static void updatePlates(void)
 {
     signal(SIGTERM, signalHandler);
-
     syslog(LOG_INFO, "updatePlate is ON \n");
 
     while (1)
     {
         
-        syslog(LOG_INFO, "update Done \n");
+        if( receivePlates() == -EXIT_FAILURE )
+        {
+            //Send warning Signal
+            kill(parentPID,SIGUSR2);
 
-        receivePlates();
+        }
 
-        sleep(30);
+        sleep(60);
 
     }
 }
@@ -86,13 +100,29 @@ static void openGateDB(void)
 {
     signal(SIGTERM, signalHandler);
     syslog(LOG_INFO, "openGateDB is ON \n");
-
+    int gate = false;
 
     while (1)
     {
-        sleep(20);
+        sleep(15);
 
-        syslog(LOG_INFO, "isToOpen Recevied: %d \n", isToOpen(PIGATE_ID));
+        gate = isToOpen(PIGATE_ID);
+
+        syslog(LOG_INFO, "isToOpen Recevied: %d \n", gate);
+
+        switch (gate)
+        {
+        case true:
+            kill(parentPID,SIGUSR1);
+            break;
+
+        case false:
+            break;
+
+        default: //Error getting isToOpen Flag
+            kill(parentPID,SIGUSR2);
+            break;
+        }
         
     }
 }

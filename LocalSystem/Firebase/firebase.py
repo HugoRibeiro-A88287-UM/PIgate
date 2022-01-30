@@ -73,6 +73,20 @@ def checkIsToOpen(PIgate_ID):
             return errno.EINVAL
 
         return gates.val()
+
+def getPIgates():
+
+    PIgate_array = []
+
+    try:
+        PIgate_ID = db.child("Gate").get()
+    except:
+        return errno.EINVAL
+
+    for PIgate_ID in PIgate_ID.each():
+        PIgate_array.append( str(PIgate_ID.key()) )
+
+    return PIgate_array
     
 
 

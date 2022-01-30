@@ -14,6 +14,7 @@
 #include <sys/time.h>
 #include <string.h>
 #include <stdbool.h>
+#include <fcntl.h>
 
 #include"../inc/utilits.h"
 #include "../inc/daemon.h"
@@ -30,6 +31,9 @@ pthread_mutex_t updatePlatesMutex = PTHREAD_MUTEX_INITIALIZER; // Mutex for whit
 
 
 
+//SIGALRM EACH MINUTE
+struct itimerval itv = {{70,0}, {70,0}};
+
 //Thread Priority
 static enum mainProcessPrio {captureCutImagePrio = 2, plateRecognitionPrio, textRecognitionPrio, updatePlatePrio, plateValidationPrio};
 
@@ -39,8 +43,6 @@ void *t_plateRecognition(void *arg);
 void *t_textRecognition(void *arg);
 void *t_updatePlate(void *arg);
 void *t_plateValidation(void *arg);
-
-
 
 
 static void signalHandler(int signo)
@@ -54,7 +56,22 @@ static void signalHandler(int signo)
             kill(daemonOpenGateDB,SIGTERM);
             exit(1);        
             break;
+
+        case SIGUSR1:
+            printf("Relay Activate \n");
+            printf("Led is Green \n");
+            setitimer (ITIMER_REAL, &itv, NULL); //Reset SIGALARM timer
+            break;
+        
+        case SIGUSR2:
+            printf("Led is Yellow \n");
+            setitimer (ITIMER_REAL, &itv, NULL); //Reset SIGALARM timer
+            break;
     
+        case SIGALRM:
+            printf("Led is IDLE \n");
+            break;
+
         default:
             break;
     }
@@ -63,8 +80,28 @@ static void signalHandler(int signo)
 }
 
 
-int main(int argc, char *argv[])
+int main(int count, char *args[])
 {
+
+    //Check if PIgate exists!
+    int fdPIgateID = open("/etc/PIgateID.txt", O_RDONLY);
+    char PIgate_ID[PIGATELEN];
+
+    if(fdPIgateID == -1)
+    {
+        printf("Cannot Open PIGateID.txt \n");
+        exit(-1);
+    }
+
+    read(fdPIgateID,PIgate_ID, PIGATELEN);
+    close(fdPIgateID);
+    
+    if( validPIgate(PIgate_ID) == -EXIT_FAILURE)
+    {
+        printf("Bad Request To Database Or PIgate Doesn't Exists \n");
+        exit(-1);
+    }
+
     //Create PIPEs
 
     if(pipe(recPlatePIPE) < 0)
@@ -85,7 +122,13 @@ int main(int argc, char *argv[])
     daemonOpenGateDB = initDaemonOpenGateDB();
 
     signal(SIGINT, signalHandler);
+    signal(SIGTERM, signalHandler);
+    signal(SIGUSR1, signalHandler);
+    signal(SIGUSR2, signalHandler);
+    signal(SIGALRM, signalHandler);
 
+
+    setitimer (ITIMER_REAL, &itv, NULL);
 
     /*Threads Creation*/
 
@@ -231,8 +274,6 @@ void *t_plateValidation(void *arg)
 
         if(whitelistPlate)
         {
-
-            insertHiffen(foundedPlate,strlen(foundedPlate));
 
             write(entriesDBPIPE[1], foundedPlate, strlen(foundedPlate));
 

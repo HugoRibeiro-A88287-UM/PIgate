@@ -6,13 +6,17 @@ DEPS = -pthread -lrt -lpython3.9
 
 RASPIP = 10.42.0.74
 
-SRCFLODER = 
+SRCFLODER = src/main.c \
+			src/deamon.c \
+			src/utilits.c \
+			src/firebase.c \
 
+PYTHONFILE = Firebase/firebase.py
 
 .PHONY: all
 all:
-	$(CCRASP) src/main.c src/deamon.c src/utilits.c src/firebase.c -o daemonTest.elf $(DEPS)
-	scp daemonTest.elf root@$(RASPIP):/etc
+	$(CCRASP) $(SRCFLODER) -o daemonTest.elf $(DEPS)
+	scp daemonTest.elf $(PYTHONFILE) root@$(RASPIP):/etc
 	 
 
 .PHONY: clean 
