@@ -232,16 +232,16 @@ int validPIgate(const char* PIgate_ID)
     for(int i = 0; i < presult_length ; i++)
     {
         presultString = PyList_GetItem(presult,i);
-        encodedString = PyUnicode_AsEncodedString(presultString, "utf-8", "strict");
+        encodedString = PyUnicode_AsEncodedString(presultString, "UTF-8", "strict");
 
         if (encodedString) 
         { //returns NULL if an exception was raised
 
             strcpy(PIgateReceived,PyBytes_AsString(encodedString)); //pointer refers to the internal buffer of encodedString
 
-            if(strcmp(PIgateReceived,PIGATE_ID) == 0)
+            if(strcmp(PIgateReceived,PIgate_ID) == 0)
             {
-                syslog(LOG_INFO,"Valid PIgate_ID:  %s\n", PIGATE_ID );
+                syslog(LOG_INFO,"Valid PIgate_ID:  %s \n", PIgate_ID );
                 return EXIT_SUCCESS;
             }
 

@@ -7,6 +7,12 @@
         "errno-base.h": "c",
         "sched.h": "c",
         "stdbool.h": "c",
-        "algorithm": "c"
+        "algorithm": "c",
+        "firebase.h": "c",
+        "utilits.h": "c",
+        "*.tcc": "c",
+        "cstdio": "c",
+        "string_view": "c",
+        "functional": "c"
     }
 }

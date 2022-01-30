@@ -7,7 +7,6 @@
 
 #include "../inc/utilits.h"
 
-//char PIGATE_ID[PIGATELEN];
 
 void setupThread(int priority, pthread_attr_t *pthread_attr, struct sched_param *pthread_param)
 {
@@ -81,15 +80,3 @@ void insertHiffen(char* buffer, int len)
     strcpy(buffer,auxBuffer);
 }
 
-void definePIgate_ID(const char* PIgate_ID)
-{
-    //The PIgate ID just can be define one Time
-
-    // if(firstTime)
-    // {
-    //     strcpy(PIGATE_ID,PIgate_ID);
-    //     firstTime = false;
-    // }
-
-    
-}

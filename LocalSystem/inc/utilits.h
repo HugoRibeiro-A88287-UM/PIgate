@@ -6,7 +6,7 @@
 #define MAXPLATESLEN 512
 #define PLATESSIZE 8
 #define PIGATELEN 8
-#define PIGATE_ID "1"
+#define SHM_PIGATEID_NAME "shm_PIgateID"
 
 int entriesDBPIPE[2];
 int recPlatePIPE[2];

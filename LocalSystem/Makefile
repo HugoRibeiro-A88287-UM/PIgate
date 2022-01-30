@@ -15,12 +15,12 @@ PYTHONFILE = Firebase/firebase.py
 
 .PHONY: all
 all:
-	$(CCRASP) $(SRCFLODER) -o daemonTest.elf $(DEPS)
-	scp daemonTest.elf $(PYTHONFILE) root@$(RASPIP):/etc
+	$(CCRASP) $(SRCFLODER) -o PIgateProgram.elf $(DEPS)
+	scp PIgateProgram.elf $(PYTHONFILE) root@$(RASPIP):/etc
 	 
 
 .PHONY: clean 
 clean: 
-	rm -f  daemonTest.elf
+	rm -f  PIgateProgram.elf
 
 	

@@ -4,31 +4,32 @@
 #include <pthread.h>
 #include <sched.h>
 #include <errno.h>
-#include <stdio.h>
-#include <string.h>
 #include <sys/mman.h>
 #include <sys/shm.h>
-#include <sys/stat.h>
+#include <sys/stat.h> /* For mode constants */
 #include <linux/types.h>
 #include <signal.h>
 #include <sys/time.h>
 #include <string.h>
 #include <stdbool.h>
-#include <fcntl.h>
+#include <fcntl.h> /* For O_* constants */  
+#include <stdint.h>    
+
 
 #include"../inc/utilits.h"
 #include "../inc/daemon.h"
 #include "../inc/firebase.h"
 
-
 pid_t daemonEntriesDB, daemonUpdatePlate, daemonOpenGateDB;
 
+//Shared Memory Variables
+char* PIGATE_ID;
+uint32_t shmPIgateID;
 
-
+//Whitelist Plates Variables
 char whitelistPlates[MAXPLATESLEN][PLATESSIZE];
 int PLATESLEN = 0;
 pthread_mutex_t updatePlatesMutex = PTHREAD_MUTEX_INITIALIZER; // Mutex for whitelistPlates buffer
-
 
 
 //SIGALRM EACH MINUTE
@@ -54,6 +55,11 @@ static void signalHandler(int signo)
             kill(daemonEntriesDB,SIGTERM);
             kill(daemonUpdatePlate,SIGTERM);
             kill(daemonOpenGateDB,SIGTERM);
+
+            munmap(PIGATE_ID, PIGATELEN);
+            close(shmPIgateID); /* Close the shared memory object */
+            shm_unlink(SHM_PIGATEID_NAME); /* Delete the shared memory object */
+
             exit(1);        
             break;
 
@@ -82,39 +88,68 @@ static void signalHandler(int signo)
 
 int main(int count, char *args[])
 {
-
     //Check if PIgate exists!
+    char PIgate_ID[PIGATELEN] = {'\0'};
+    uint32_t shmMode;
     int fdPIgateID = open("/etc/PIgateID.txt", O_RDONLY);
-    char PIgate_ID[PIGATELEN];
+
 
     if(fdPIgateID == -1)
     {
-        printf("Cannot Open PIGateID.txt \n");
+        perror("Cannot Open PIGateID.txt \n");
         exit(-1);
     }
 
-    read(fdPIgateID,PIgate_ID, PIGATELEN);
+    
+    read(fdPIgateID,PIgate_ID, 1);  
     close(fdPIgateID);
     
     if( validPIgate(PIgate_ID) == -EXIT_FAILURE)
     {
-        printf("Bad Request To Database Or PIgate Doesn't Exists \n");
+        perror("Bad Request To Database Or PIgate Doesn't Exists \n");
         exit(-1);
     }
 
+    //IPCs
     //Create PIPEs
-
     if(pipe(recPlatePIPE) < 0)
     {
-        printf("Error in recPlatePIPE creation");
-        exit(1);
+        perror("Error in recPlatePIPE creation");
+        exit(-1);
     }
 
     if(pipe(entriesDBPIPE) < 0)
     {
-        printf("Error in entriesDBPIPE creation");
-        exit(1);
+        perror("Error in entriesDBPIPE creation");
+        exit(-1);
     }
+
+    //Creat Shared Memory
+    /* Open the shared memory object */
+
+    shmMode =   S_IRWXU |   //user (file owner) has read, write, and execute permission
+                S_IRGRP;    // group has read permission
+    if ( (shmPIgateID = shm_open(SHM_PIGATEID_NAME , O_CREAT|O_RDWR|O_TRUNC, shmMode)) == -1 ) 
+    {
+         perror("PIgateID shm_open failure");
+         exit(-1);
+    }
+
+    /* Preallocate a shared memory area by determine the current 
+    value of a configurable system limit for pagesize*/
+    if(ftruncate(shmPIgateID, PIGATELEN) == -1)
+    {
+        perror("PIgateID ftruncate failure");
+        exit(-1);
+    }
+
+    if((PIGATE_ID = mmap(0, PIGATELEN, PROT_WRITE|PROT_READ, MAP_SHARED,shmPIgateID,0)) == (caddr_t) -1) 
+    {
+        perror("PIgateID mmap failure");
+        exit(-1);
+    }
+
+    strcpy(PIGATE_ID,PIgate_ID);
 
 
     daemonEntriesDB = initDaemonEntriesDB();
@@ -180,7 +215,7 @@ void *t_captureCutImage(void *arg)
         
         sleep(16);
         
-        system("ps -A |grep ./daemon");
+        system("ps -A |grep ./PIgateProgram");
 
     }
     

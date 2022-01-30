@@ -22,7 +22,29 @@
 #include "../inc/daemon.h"
 
 pid_t parentPID;
+uint32_t shmPIgateID;
+char* PIGATE_ID;
 
+
+static void openSharedMemory(void)
+{
+    
+    /* Open the shared memory object */
+   if ( (shmPIgateID = shm_open(SHM_PIGATEID_NAME, O_RDONLY, 0)) == -1 ) 
+   {
+        syslog(LOG_ERR,"PIGATE_ID DAEMON shm_open failure");
+        kill(parentPID,SIGTERM);
+   }
+
+   if((PIGATE_ID = mmap(0, PIGATELEN, PROT_READ, MAP_SHARED,shmPIgateID,0)) == (caddr_t) -1)
+   {
+        syslog(LOG_ERR," PIGATE_ID DAEMON mmap failure");
+        kill(parentPID,SIGTERM);
+   }
+
+    syslog(LOG_INFO,"PIgate_ID: %s", PIGATE_ID);
+
+}
 
 static void signalHandler(int signo)
 {		
@@ -31,6 +53,9 @@ static void signalHandler(int signo)
     {
         case SIGTERM:
             syslog(LOG_INFO, "Deamon dead xP \n");
+
+            munmap(PIGATE_ID, PIGATELEN);
+            close(shmPIgateID); /* Close the shared memory object */
             exit(1);        
             break;
     
@@ -46,10 +71,13 @@ static void entriesDB(void)
     const int inBuffSize = PLATESSIZE+1;
     char inBuff[inBuffSize];
 
-    signal(SIGTERM, signalHandler);
-    syslog(LOG_INFO, "entriesDB is ON \n");
 
+    signal(SIGTERM, signalHandler);    
+    openSharedMemory();
     close(entriesDBPIPE[1]); // Close writing end 
+
+
+    syslog(LOG_INFO, "entriesDB is ON \n");
 
     while (1)
     {
@@ -79,6 +107,9 @@ static void entriesDB(void)
 static void updatePlates(void)
 {
     signal(SIGTERM, signalHandler);
+    openSharedMemory();
+
+
     syslog(LOG_INFO, "updatePlate is ON \n");
 
     while (1)
@@ -98,10 +129,15 @@ static void updatePlates(void)
 
 static void openGateDB(void)
 {
-    signal(SIGTERM, signalHandler);
-    syslog(LOG_INFO, "openGateDB is ON \n");
     int gate = false;
 
+
+    signal(SIGTERM, signalHandler);
+    openSharedMemory();
+
+
+    syslog(LOG_INFO, "openGateDB is ON \n");
+    
     while (1)
     {
         sleep(15);
