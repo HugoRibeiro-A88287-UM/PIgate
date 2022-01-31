@@ -16,7 +16,12 @@ Note: By adding all the packages, the ROOT file system storage couldn't be enoug
 
 -> System Configuration
 
-	    dev management = devtmpfs + eudev
+	dev management = devtmpfs + eudev
+	run a getty (login prompt) after boot
+		TTY port = ttyAMA0
+		baudrate = 115200 
+		
+	    
 
 -> Target packages
 

@@ -10,6 +10,6 @@ if [ -e ${TARGET_DIR}/etc/inittab ]; then
 tty1::respawn:/sbin/getty -L  tty1 0 vt100 # HDMI console' ${TARGET_DIR}/etc/inittab
 fi
 
-cp board/raspberrypi4/interfaces ${TARGET_DIR}/etc/network/interfaces
-cp board/raspberrypi4/inittab ${TARGET_DIR}/etc/inittab
-cp board/raspberrypi4/wpa_supplicant.conf ${TARGET_DIR}/etc/wpa_supplicant.conf
+cp board/raspberrypi4-64/interfaces ${TARGET_DIR}/etc/network/interfaces
+cp board/raspberrypi4-64/inittab ${TARGET_DIR}/etc/inittab
+cp board/raspberrypi4-64/wpa_supplicant.conf ${TARGET_DIR}/etc/wpa_supplicant.conf

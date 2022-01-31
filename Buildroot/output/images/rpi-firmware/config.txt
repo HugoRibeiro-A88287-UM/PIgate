@@ -25,7 +25,7 @@ gpu_mem_512=512
 gpu_mem_1024=512
 
 # fixes rpi (3B, 3B+, 3A+, 4B and Zero W) ttyAMA0 serial console
-dtoverlay=miniuart-bt
+dtoverlay=disable-bt
 
 
 #enable pwm
@@ -36,3 +36,5 @@ dtparam=i2c_arm=on
 dtparam=i2c_vc=on
 dtoverlay=vc4-fkms-v3d
 start_x=1
+
+enable_uart = 1

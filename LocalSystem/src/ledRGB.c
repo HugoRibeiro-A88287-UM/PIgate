@@ -16,12 +16,14 @@ status_t ledStatus = idle;
 
 int initLedRGB(void)
 {
-    while (system("insmod ledRGB.ko") != 0 )
-    {}
 
-    isLedRGBModuleActive = ON;
+    if( system("insmod ledRGB.ko") == 0 )
+    {
+        isLedRGBModuleActive = ON;
+        return EXIT_SUCCESS;
+    }
 
-    return EXIT_SUCCESS;
+    return -EXIT_FAILURE;
 }
 
 void remLedRGB(void)

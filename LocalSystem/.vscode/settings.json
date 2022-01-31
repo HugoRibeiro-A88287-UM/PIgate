@@ -13,6 +13,7 @@
         "*.tcc": "c",
         "cstdio": "c",
         "string_view": "c",
-        "functional": "c"
+        "functional": "c",
+        "pthread.h": "c"
     }
 }

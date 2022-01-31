@@ -5,6 +5,7 @@
 #include <sys/syslog.h>
 #include <stdbool.h>
 #include "/home/hugo/Downloads/buildroot-2021.02.5/output/host/include/python3.9/Python.h"
+
 #include "../inc/utilits.h"
 #include "../inc/firebase.h"
 
@@ -14,7 +15,7 @@ static PyObject* get_pDict(void)
     PyObject *pName, *pModule, *pDict ; 
 
     // Set PYTHONPATH TO working directory
-    setenv("PYTHONPATH","/etc/",1);
+    setenv("PYTHONPATH","/etc/PIgate/",1);
 
     // Initialize the Python Interpreter
     Py_Initialize();

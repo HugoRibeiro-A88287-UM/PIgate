@@ -15,12 +15,14 @@ char isRelayModuleActive = OFF;
 
 int initRelay(void)
 {
-    while (system("insmod relay.ko") != 0 )
-    {}
+    if( system("insmod relay.ko") == 0 )
+    {
+        isRelayModuleActive = ON;
+        return EXIT_SUCCESS;
+    }
 
-    isRelayModuleActive = ON;
-
-    return EXIT_SUCCESS;
+    return -EXIT_FAILURE;
+    
 }
 
 void remRelay(void)
@@ -46,7 +48,7 @@ int openGate(void)
             printf("Failure Open: Write Operation in Relay Device Driver \n");
             return -EXIT_FAILURE;
         }
-        sleep(1); /*Little delay */
+        sleep(1); /*Little delay to generate a pulse */
 
         if( write(fd0,&relayClose,1) != 1)
         {

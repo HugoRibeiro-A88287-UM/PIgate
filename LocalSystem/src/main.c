@@ -19,7 +19,10 @@
 #include"../inc/utilits.h"
 #include "../inc/daemon.h"
 #include "../inc/firebase.h"
+#include "../inc/ledRGB.h"
+#include "../inc/relay.h"
 
+//Daemons PID
 pid_t daemonEntriesDB, daemonUpdatePlate, daemonOpenGateDB;
 
 //Shared Memory Variables
@@ -32,8 +35,8 @@ int PLATESLEN = 0;
 pthread_mutex_t updatePlatesMutex = PTHREAD_MUTEX_INITIALIZER; // Mutex for whitelistPlates buffer
 
 
-//SIGALRM EACH MINUTE
-struct itimerval itv = {{70,0}, {70,0}};
+//SIGALRM EACH 1 MINUTE and 10 Seconds
+struct itimerval itv = {{10,0}, {10,0}};
 
 //Thread Priority
 static enum mainProcessPrio {captureCutImagePrio = 2, plateRecognitionPrio, textRecognitionPrio, updatePlatePrio, plateValidationPrio};
@@ -60,22 +63,33 @@ static void signalHandler(int signo)
             close(shmPIgateID); /* Close the shared memory object */
             shm_unlink(SHM_PIGATEID_NAME); /* Delete the shared memory object */
 
+            //Remove Device Drivers
+            remRelay();
+            remLedRGB();
+
             exit(1);        
             break;
 
         case SIGUSR1:
             printf("Relay Activate \n");
+            openGate();
+
             printf("Led is Green \n");
+            ledRGBStatus(allow);
+
             setitimer (ITIMER_REAL, &itv, NULL); //Reset SIGALARM timer
             break;
         
         case SIGUSR2:
             printf("Led is Yellow \n");
+            ledRGBStatus(warning);
+
             setitimer (ITIMER_REAL, &itv, NULL); //Reset SIGALARM timer
             break;
     
         case SIGALRM:
             printf("Led is IDLE \n");
+            ledRGBStatus(idle);
             break;
 
         default:
@@ -91,7 +105,7 @@ int main(int count, char *args[])
     //Check if PIgate exists!
     char PIgate_ID[PIGATELEN] = {'\0'};
     uint32_t shmMode;
-    int fdPIgateID = open("/etc/PIgateID.txt", O_RDONLY);
+    int fdPIgateID = open("/etc/PIgate/PIgateID.txt", O_RDONLY);
 
 
     if(fdPIgateID == -1)
@@ -152,6 +166,18 @@ int main(int count, char *args[])
     strcpy(PIGATE_ID,PIgate_ID);
 
 
+    //Adding Devices Drivers
+    if( initLedRGB() || initRelay() )
+    {
+        remLedRGB();
+        remRelay();
+        perror("Error trying to insert Device Drivers \n");
+        exit(-1);
+    }
+
+    ledRGBStatus(idle);
+
+
     daemonEntriesDB = initDaemonEntriesDB();
     daemonUpdatePlate = initDaemonUpdatePlate();
     daemonOpenGateDB = initDaemonOpenGateDB();
@@ -161,9 +187,8 @@ int main(int count, char *args[])
     signal(SIGUSR1, signalHandler);
     signal(SIGUSR2, signalHandler);
     signal(SIGALRM, signalHandler);
-
-
     setitimer (ITIMER_REAL, &itv, NULL);
+
 
     /*Threads Creation*/
 
@@ -280,7 +305,8 @@ void *t_updatePlate(void *arg)
 
         pthread_mutex_unlock(&updatePlatesMutex);
         
-        sleep(7);
+        //Little delay
+        sleep(2);
         
     }
     
@@ -315,13 +341,16 @@ void *t_plateValidation(void *arg)
             whitelistPlate = false;
 
             printf(" GOOD PLATE \n ");
+            ledRGBStatus(allow);
+            openGate();
         }
         else
         {
             printf(" BAD PLATE \n ");
+            ledRGBStatus(denied);
         }
         
-        sleep(30);
+        sleep(20);
 
     }
     

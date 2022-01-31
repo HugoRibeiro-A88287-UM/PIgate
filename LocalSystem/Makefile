@@ -1,26 +1,37 @@
-CCRASP = arm-buildroot-linux-gnueabihf-gcc
-
-CFLAGS = -g -I. 
-
-DEPS = -pthread -lrt -lpython3.9
-
+PROJ_NAME = PIgate
 RASPIP = 10.42.0.74
 
-SRCFLODER = src/main.c \
-			src/deamon.c \
-			src/utilits.c \
-			src/firebase.c \
-
-PYTHONFILE = Firebase/firebase.py
+SRC_FOLDER = src
+RELAY_FOLDER = DDrelay
+LEDRGB_FOLDER = DDleds
+DOCS_FOLDER = docs/PIgateID.txt
+FIREBASE_FILE = Firebase/firebase.py
 
 .PHONY: all
-all:
-	$(CCRASP) $(SRCFLODER) -o PIgateProgram.elf $(DEPS)
-	scp PIgateProgram.elf $(PYTHONFILE) root@$(RASPIP):/etc
-	 
+all: PIgateFolder BuildPIgateSystem transferPIgateSystem clean sendPIgateToRasp
+	
+PIgateFolder:
+	mkdir -p $(PROJ_NAME)
+
+BuildPIgateSystem: 
+	$(MAKE) -C $(SRC_FOLDER)
+	$(MAKE) -C $(RELAY_FOLDER)
+	$(MAKE) -C $(LEDRGB_FOLDER)
+
+transferPIgateSystem:
+	cp -t $(PROJ_NAME) $(DOCSFOLDER) $(FIREBASE_FILE) $(SRC_FOLDER)/PIgateProgram.elf
+	cp -t $(PROJ_NAME) $(RELAY_FOLDER)/relay.ko $(LEDRGB_FOLDER)/ledRGB.ko
+
+sendPIgateToRasp:
+	scp -r $(PROJ_NAME) root@$(RASPIP):/etc
 
 .PHONY: clean 
 clean: 
-	rm -f  PIgateProgram.elf
+	$(MAKE) -C $(SRC_FOLDER) clean
+	$(MAKE) -C $(LEDRGB_FOLDER) clean
+	$(MAKE) -C $(RELAY_FOLDER) clean
+
+
+
 
 	
