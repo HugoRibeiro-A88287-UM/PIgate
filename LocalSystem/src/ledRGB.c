@@ -1,17 +1,33 @@
-#include "../inc/ledRGB.h"
+/**
+ * @file ledRGB.c
+ * @author PIgate
+ * @brief LedRGB Module Implementation
+ * @version 0.1
+ * @date 2022-01-31
+ * 
+ * @copyright Copyright (c) 2022
+ * 
+ */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <fcntl.h>
 #include <errno.h>
 
-enum status {ON = 0, OFF};
-char isLedRGBModuleActive = OFF;
+#include "../inc/ledRGB.h"
 
+//Define the module status
+typedef enum moduleStatus {ON = 0, OFF} moduleStatus_t ;
+moduleStatus_t isLedRGBModuleActive = OFF;
+
+//Arrays defenition
 const char red[] = "red";
 const char green[] = "green";
 const char yellow[] = "yellow";
 const char idleArray[] = "idle";
+
+//Default status is idle
 status_t ledStatus = idle;
 
 int initLedRGB(void)

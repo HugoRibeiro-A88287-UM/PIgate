@@ -6,9 +6,10 @@ RELAY_FOLDER = DDrelay
 LEDRGB_FOLDER = DDleds
 DOCS_FOLDER = docs/PIgateID.txt
 FIREBASE_FILE = Firebase/firebase.py
+DOXYGEN = /usr/local/bin/doxygen
 
 .PHONY: all
-all: PIgateFolder BuildPIgateSystem transferPIgateSystem clean sendPIgateToRasp
+all: PIgateFolder BuildPIgateSystem documentation transferPIgateSystem clean sendPIgateToRasp
 	
 PIgateFolder:
 	mkdir -p $(PROJ_NAME)
@@ -24,6 +25,9 @@ transferPIgateSystem:
 
 sendPIgateToRasp:
 	scp -r $(PROJ_NAME) root@$(RASPIP):/etc
+
+documentation:
+	$(DOXYGEN) Doxyfile
 
 .PHONY: clean 
 clean: 

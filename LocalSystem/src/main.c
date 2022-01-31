@@ -1,3 +1,13 @@
+/**
+ * @file main.c
+ * @author PIgate
+ * @brief PIgateProgram Main Code
+ * @version 0.1
+ * @date 2022-01-31
+ * 
+ * @copyright Copyright (c) 2022
+ * 
+ */
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -36,7 +46,7 @@ pthread_mutex_t updatePlatesMutex = PTHREAD_MUTEX_INITIALIZER; // Mutex for whit
 
 
 //SIGALRM EACH 1 MINUTE and 10 Seconds
-struct itimerval itv = {{10,0}, {10,0}};
+struct itimerval itv = {{70,0}, {70,0}};
 
 //Thread Priority
 static enum mainProcessPrio {captureCutImagePrio = 2, plateRecognitionPrio, textRecognitionPrio, updatePlatePrio, plateValidationPrio};
@@ -48,7 +58,11 @@ void *t_textRecognition(void *arg);
 void *t_updatePlate(void *arg);
 void *t_plateValidation(void *arg);
 
-
+/**
+ * @brief Parent Proccess Signal Handler
+ * 
+ * @param signo Received Signal
+ */
 static void signalHandler(int signo)
 {		
     switch (signo)
@@ -102,11 +116,12 @@ static void signalHandler(int signo)
 
 int main(int count, char *args[])
 {
-    //Check if PIgate exists!
+    
     char PIgate_ID[PIGATELEN] = {'\0'};
     uint32_t shmMode;
+    
+    //Check if PIgate exists
     int fdPIgateID = open("/etc/PIgate/PIgateID.txt", O_RDONLY);
-
 
     if(fdPIgateID == -1)
     {
@@ -138,7 +153,7 @@ int main(int count, char *args[])
         exit(-1);
     }
 
-    //Creat Shared Memory
+    //Create Shared Memory
     /* Open the shared memory object */
 
     shmMode =   S_IRWXU |   //user (file owner) has read, write, and execute permission
@@ -167,6 +182,7 @@ int main(int count, char *args[])
 
 
     //Adding Devices Drivers
+
     if( initLedRGB() || initRelay() )
     {
         remLedRGB();
@@ -177,6 +193,8 @@ int main(int count, char *args[])
 
     ledRGBStatus(idle);
 
+
+    //Daemons Creation
 
     daemonEntriesDB = initDaemonEntriesDB();
     daemonUpdatePlate = initDaemonUpdatePlate();
@@ -350,7 +368,7 @@ void *t_plateValidation(void *arg)
             ledRGBStatus(denied);
         }
         
-        sleep(20);
+        sleep(60);
 
     }
     

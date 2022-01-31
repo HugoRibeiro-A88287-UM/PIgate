@@ -1,3 +1,13 @@
+/**
+ * @file utilits.c
+ * @author PIgate
+ * @brief Utilitis Module Implementation
+ * @version 0.1
+ * @date 2022-01-31
+ * 
+ * @copyright Copyright (c) 2022
+ * 
+ */
 #include <errno.h>
 #include <sys/syslog.h>
 #include <stdlib.h>
@@ -56,7 +66,7 @@ void removeHiffen(char* buffer, int len)
 
 }
 
-void insertHiffen(char* buffer, int len)
+void insertPlateHiffen(char* buffer, int len)
 {
     const int plateCharacterNumber = 6;
     char auxBuffer[len];

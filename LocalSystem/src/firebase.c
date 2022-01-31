@@ -1,3 +1,14 @@
+/**
+ * @file firebase.c
+ * @author PIgate
+ * @brief Firebase Module Implementation
+ * @version 0.1
+ * @date 2022-01-31
+ * 
+ * @copyright Copyright (c) 2022
+ * 
+ */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -9,7 +20,11 @@
 #include "../inc/utilits.h"
 #include "../inc/firebase.h"
 
-
+/**
+ * @brief Get the pDict object
+ * 
+ * @return NULL if an error occurs ; pDict Pointer
+ */
 static PyObject* get_pDict(void)
 {
     PyObject *pName, *pModule, *pDict ; 
@@ -38,6 +53,7 @@ static PyObject* get_pDict(void)
     return pDict;
 
 }
+
 
 int sendEntry(const char* PIgate_ID, const char* Plate)
 {

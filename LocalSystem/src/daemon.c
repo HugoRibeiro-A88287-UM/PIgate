@@ -1,3 +1,12 @@
+ /** @file daemon.c
+ * @author PIgate
+ * @brief Daemons Module Implementation
+ * @version 0.1
+ * @date 2022-01-31
+ * 
+ * @copyright Copyright (c) 2022
+ * 
+ */
 #include <sys/syslog.h>
 #include <stdio.h>
 #include <sys/socket.h>
@@ -17,6 +26,7 @@
 #include <sched.h>
 #include <stdbool.h>
 
+
 #include "../inc/utilits.h"
 #include "../inc/firebase.h"
 #include "../inc/daemon.h"
@@ -25,7 +35,10 @@ pid_t parentPID;
 uint32_t shmPIgateID;
 char* PIGATE_ID;
 
-
+/**
+ * @brief Opens Shared Memory to get the PIgate_ID from the parents proccess
+ * 
+ */
 static void openSharedMemory(void)
 {
     
@@ -46,6 +59,12 @@ static void openSharedMemory(void)
 
 }
 
+
+/**
+ * @brief Daemons Signal Handler
+ * 
+ * @param signo received signal
+ */
 static void signalHandler(int signo)
 {		
 
@@ -66,6 +85,11 @@ static void signalHandler(int signo)
     return;
 }
 
+
+/**
+ * @brief EntriesDB Execution Function
+ * 
+ */
 static void entriesDB(void)
 {
     const int inBuffSize = PLATESSIZE+1;
@@ -86,7 +110,7 @@ static void entriesDB(void)
         while( read(entriesDBPIPE[0] , inBuff, inBuffSize) < 1 )
         {}
 
-        insertHiffen(inBuff,inBuffSize);
+        insertPlateHiffen(inBuff,inBuffSize);
 
         if ( sendEntry(PIGATE_ID, inBuff) == -EXIT_FAILURE)
         {
@@ -104,6 +128,11 @@ static void entriesDB(void)
 
 }
 
+
+/**
+ * @brief updatePlates Execution Function
+ * 
+ */
 static void updatePlates(void)
 {
     signal(SIGTERM, signalHandler);
@@ -127,6 +156,10 @@ static void updatePlates(void)
     }
 }
 
+/**
+ * @brief openGateDB Execution Function
+ * 
+ */
 static void openGateDB(void)
 {
     int gate = false;

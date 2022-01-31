@@ -73,6 +73,7 @@ def checkIsToOpen(PIgate_ID):
             return errno.EINVAL
 
         return gates.val()
+        
 
 def getPIgates():
 

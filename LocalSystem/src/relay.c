@@ -1,17 +1,28 @@
-#include "../inc/relay.h"
+/**
+ * @file relay.c
+ * @author PIgate
+ * @brief Relay Module Implementation
+ * @version 0.1
+ * @date 2022-01-31
+ * 
+ * @copyright Copyright (c) 2022
+ * 
+ */
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <fcntl.h>
 #include <errno.h>
 
-enum status {ON = 0, OFF};
+#include "../inc/relay.h"
+
+//Define the Module Status 
+typedef enum moduleStatus {ON = 0, OFF} moduleStatus_t;
 const char relayOpen = '1';
 const char relayClose = '0';
 
-
-relayStatus_t relayStatus;
-char isRelayModuleActive = OFF;
+gateStatus_t gateStatus;
+moduleStatus_t isRelayModuleActive = OFF;
 
 int initRelay(void)
 {
@@ -76,14 +87,14 @@ int getGateStatus(void)
             return -EXIT_FAILURE;
         }   
 
-        if( read(fd0,&relayStatus,1) != 1)
+        if( read(fd0,&gateStatus,1) != 1)
         {
             printf("Failure Open: Write Operation in Relay Device Driver \n");
             return -EXIT_FAILURE;
         }
         close(fd0);
 
-        return relayStatus;
+        return gateStatus;
         
     }
 
