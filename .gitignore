@@ -52,5 +52,5 @@ Mkfile.old
 dkms.conf
 
 #PIgate Folder
-LocalSystem/docs/Doxygen
-LocalSystem/PIgate
+LocalSystem/docs/Doxygen/
+LocalSystem/PIgate/
