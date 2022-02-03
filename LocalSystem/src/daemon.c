@@ -225,7 +225,7 @@ pid_t initDaemonEntriesDB(void)
         return pid;
     }
 
-    //Create Deamon Process
+    // Deamon Process
 
     sid = setsid(); // create a new session
 
@@ -281,7 +281,7 @@ pid_t initDaemonUpdatePlate(void)
         return pid;
     }
 
-    //Create Deamon Process
+    //Deamon Process
 
     sid = setsid(); // create a new session
 
@@ -339,7 +339,7 @@ pid_t initDaemonOpenGateDB(void)
         return pid;
     }
 
-    //Create Deamon Process
+    //Deamon Process
 
     sid = setsid(); // create a new session
 

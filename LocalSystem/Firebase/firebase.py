@@ -1,3 +1,4 @@
+from sre_constants import SUCCESS
 import pyrebase
 from datetime import datetime 
 import errno
@@ -17,6 +18,15 @@ firebase = pyrebase.initialize_app(config)
 db = firebase.database()
 
 
+"""
+ * @brief Sends an Entry to the database
+ * 
+ * @param PIgate_ID 
+ * @param Plate 
+ * @return -EINVAL: if and error occurs ;
+ *          Otherwise SUCCESS 
+ *        
+"""
 def sendEntry(PIgate_ID, Plate):
 
     now = datetime.now()
@@ -35,8 +45,15 @@ def sendEntry(PIgate_ID, Plate):
         return 1
     except:
         return errno.EINVAL
+    
 
-
+"""
+ * @brief Receive all the existent plates in the database
+ * 
+ * @return -EINVAL: if and error occurs ;
+ *          Otherwise an array with all received plates 
+ *        
+"""
 def getPlates():
 
     plate_array = []
@@ -52,6 +69,15 @@ def getPlates():
     return plate_array
 
 
+"""
+ * @brief Checks if the isToOpen variavel in ON. If yes, this function
+ *  automactly changes that value to OFF
+ *
+ * @param PIgate_ID 
+ * @return -EINVAL: if and error occurs ;
+ *          Otherwise the received isToOpen variavel  
+ *        
+"""
 def checkIsToOpen(PIgate_ID):
 
     reference = "Gate/" + PIgate_ID + "/isToOpen"
@@ -75,6 +101,13 @@ def checkIsToOpen(PIgate_ID):
         return gates.val()
         
 
+"""
+ * @brief Receive all the existent PIgates in the database
+ * 
+ * @return -EINVAL: if and error occurs ;
+ *          Otherwise an array with all received PIgates 
+ *        
+"""
 def getPIgates():
 
     PIgate_array = []

@@ -18,8 +18,8 @@
 
 //Define the Module Status 
 typedef enum moduleStatus {ON = 0, OFF} moduleStatus_t;
-const char relayOpen = '1';
-const char relayClose = '0';
+const char relayOpen[] = "OPEN";
+const char relayClose[] = "CLOSE";
 
 gateStatus_t gateStatus;
 moduleStatus_t isRelayModuleActive = OFF;

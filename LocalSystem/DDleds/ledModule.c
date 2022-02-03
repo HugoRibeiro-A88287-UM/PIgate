@@ -391,7 +391,7 @@ static void pwm_frequency(uint32_t freq) {
    */
 	SetGPIOFunction(s_pGpioRegisters,LED_GREEN_PWM1, GPIO_ALT_FUNC0);
 
-	//Define Channel 1 pwm0/1 characteristics 
+	//Define Channel 1/2 pwm0 characteristics 
 
 	pwm0_ctl->MODE1 = 0; /*			PWM mode		*/	pwm0_ctl->MODE2 = 0;
 	pwm0_ctl->RPTL1 = 0; /*		Repeat Last Data	*/	pwm0_ctl->RPTL2 = 0;
@@ -402,7 +402,8 @@ static void pwm_frequency(uint32_t freq) {
 
 	pwm0_ctl->CLRF = 1; /*Clear FIFO*/
 
-
+	pwm0_ctl->PWEN1 = 1; /* Enable PWM */
+	pwm0_ctl->PWEN2 = 1; 
 
 	printk("Success: Set PWM frequency");
 }

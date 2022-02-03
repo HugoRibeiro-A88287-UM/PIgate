@@ -59,7 +59,7 @@ void *t_updatePlate(void *arg);
 void *t_plateValidation(void *arg);
 
 /**
- * @brief Parent Proccess Signal Handler
+ * @brief Parent Process Signal Handler
  * 
  * @param signo Received Signal
  */
@@ -294,8 +294,7 @@ void *t_textRecognition(void *arg)
 
 void *t_updatePlate(void *arg)
 {
-    const int inBuffSize = PLATESSIZE+1;
-    char inBuff[inBuffSize];
+    char inBuff[PLATESSIZE];
 
     close(recPlatePIPE[1]); // Close writing end 
 
@@ -303,18 +302,17 @@ void *t_updatePlate(void *arg)
     {
         
 
-        while( read(recPlatePIPE[0] , inBuff, inBuffSize) < 1 )
+        while( read(recPlatePIPE[0] , inBuff, PLATESSIZE) < 1 )
         {}
+
+        //Convert a string into integer
+        PLATESLEN = atoi(inBuff);
 
         pthread_mutex_lock(&updatePlatesMutex);
 
-        PLATESLEN = atoi(inBuff);
-
         for(int i = 0 ; i < PLATESLEN ; i++)
         {
-            read(recPlatePIPE[0] , inBuff, inBuffSize);
-
-            removeHiffen(inBuff, inBuffSize);
+            read(recPlatePIPE[0] , inBuff, PLATESSIZE);
 
             strcpy(whitelistPlates[i] , inBuff);
 

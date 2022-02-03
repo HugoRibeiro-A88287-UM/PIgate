@@ -30,7 +30,7 @@ static PyObject* get_pDict(void)
     PyObject *pName, *pModule, *pDict ; 
 
     // Set PYTHONPATH TO working directory
-    setenv("PYTHONPATH","/etc/PIgate/",1);
+    setenv("PYTHONPATH",".",1);
 
     // Initialize the Python Interpreter
     Py_Initialize();
@@ -98,15 +98,17 @@ int receivePlates(void)
     PyObject *presultString, *encodedString;
     int presult_length;
     static bool firstTime = true;
-    char platesSize[PLATESSIZE+1];
+    char receivedPlate[PLATESSIZE+1];
+    int platesSize[MAXPLATELENDIGITS];
 
-    if(firstTime)
+    if( close(recPlatePIPE[0]) != 0 && firstTime == true)
     {
-        close(recPlatePIPE[0]); // Close reading end 
-        firstTime = false;
-
+        syslog(LOG_ERR,"Python getPlates function is broken!\n" );
+        return -EXIT_FAILURE;
     }
     
+    firstTime = false;
+
     pDict = get_pDict();
         
     if(pDict == NULL)
@@ -137,9 +139,9 @@ int receivePlates(void)
 
     presult_length = PyObject_Length(presult);
 
-    //Insert length in PIPE
+    //Insert length in PIPE. 
     sprintf(platesSize, "%d", presult_length);   
-    write(recPlatePIPE[1],platesSize,4);
+    write(recPlatePIPE[1],platesSize,MAXPLATELENDIGITS);
 
     for(int i = 0; i < presult_length ; i++)
     {
@@ -149,11 +151,13 @@ int receivePlates(void)
         if (encodedString) 
         {//returns NULL if an exception was raised
 
-            strcpy(platesSize,PyBytes_AsString(encodedString)); //pointer refers to the internal buffer of encodedString
+            strcpy(receivedPlate,PyBytes_AsString(encodedString)); //pointer refers to the internal buffer of encodedString
 
-            syslog(LOG_INFO, "Plate: %s \n", platesSize );
+            syslog(LOG_INFO, "Plate: %s \n", receivedPlate );
 
-            write(recPlatePIPE[1], platesSize, (PLATESSIZE+1) );
+            removeHiffen(receivedPlate,(PLATESSIZE+1));
+
+            write(recPlatePIPE[1], receivedPlate, PLATESSIZE );
 
         }
         else

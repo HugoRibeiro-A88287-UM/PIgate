@@ -18,6 +18,7 @@
  * 
  */
 #define MAXPLATESLEN 512
+#define MAXPLATELENDIGITS 4
 #define PLATESSIZE 8
 #define PIGATELEN 8
 #define SHM_PIGATEID_NAME "shm_PIgateID"
