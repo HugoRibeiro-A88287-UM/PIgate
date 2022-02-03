@@ -92,7 +92,7 @@ int sendEntry(const char* PIgate_ID, const char* Plate)
     return EXIT_SUCCESS;
 }
 
-int receivePlates(void)
+int receivePlates(const char* PIgate_ID)
 {
     PyObject *pFunc,*presult, *pDict;
     PyObject *presultString, *encodedString;
@@ -122,7 +122,7 @@ int receivePlates(void)
     if (PyCallable_Check(pFunc))
     {
 
-        presult = PyObject_CallFunction(pFunc,NULL);
+        presult = PyObject_CallFunction(pFunc,"s",PIgate_ID);
 
         if( (int)PyLong_AsLong(presult) == EINVAL )
         {

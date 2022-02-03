@@ -24,13 +24,14 @@ int sendEntry(const char* PIgate_ID, const char* Plate);
 
 
 /**
- * @brief Requests and Receive all the existent plates in the database.
+ * @brief Requests and Receive all the PIgate plates in the database.
  * Also it put all the received plates into the recPlatePIPE
  * 
+ * @param PIgate_ID  
  * @return -EXIT_FAILURE: if and error occurs ;
  *          Otherwise EXIT_SUCCESS 
  */
-int receivePlates(void);
+int receivePlates(const char* PIgate_ID);
 
 
 /**

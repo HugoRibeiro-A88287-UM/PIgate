@@ -48,23 +48,30 @@ def sendEntry(PIgate_ID, Plate):
     
 
 """
- * @brief Receive all the existent plates in the database
+ * @brief Receive all the PIgate plates in the database
  * 
  * @return -EINVAL: if and error occurs ;
  *          Otherwise an array with all received plates 
  *        
 """
-def getPlates():
+def getPlates(PIgate_ID):
 
     plate_array = []
 
     try:
-        plates = db.child("Car").get()
+        plates = db.child("Car_Reg").get()
     except:
         return errno.EINVAL
 
     for plates in plates.each():
-        plate_array.append(plates.key())
+        plate = plates.key()
+        aux = plate.split("|")
+
+        if(aux[0] == "Not Available"):
+            continue
+
+        if( aux[1] == PIgate_ID):
+            plate_array.append(aux[0])
 
     return plate_array
 

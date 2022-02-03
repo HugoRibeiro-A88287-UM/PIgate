@@ -144,7 +144,7 @@ static void updatePlates(void)
     while (1)
     {
         
-        if( receivePlates() == -EXIT_FAILURE )
+        if( receivePlates(PIGATE_ID) == -EXIT_FAILURE )
         {
             //Send warning Signal
             kill(parentPID,SIGUSR2);
