@@ -15,5 +15,6 @@
         "string_view": "c",
         "functional": "c",
         "pthread.h": "c"
-    }
+    },
+    "C_Cpp.errorSquiggles": "Disabled"
 }

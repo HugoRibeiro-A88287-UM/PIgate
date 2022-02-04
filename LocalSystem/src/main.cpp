@@ -25,12 +25,15 @@
 #include <fcntl.h> /* For O_* constants */  
 #include <stdint.h>    
 
-
+extern "C" {
 #include"../inc/utilits.h"
 #include "../inc/daemon.h"
 #include "../inc/firebase.h"
 #include "../inc/ledRGB.h"
 #include "../inc/relay.h"
+#include "../inc/fifo.h"
+}
+
 
 //Daemons PID
 pid_t daemonEntriesDB, daemonUpdatePlate, daemonOpenGateDB;
@@ -44,12 +47,16 @@ char whitelistPlates[MAXPLATESLEN][PLATESSIZE];
 int PLATESLEN = 0;
 pthread_mutex_t updatePlatesMutex = PTHREAD_MUTEX_INITIALIZER; // Mutex for whitelistPlates buffer
 
+//Fifo3 Variavels
+const int plateTextLen = 4;
+arrayString plateText[4];
+fifoString_t textFifo;
 
 //SIGALRM EACH 1 MINUTE and 10 Seconds
 struct itimerval itv = {{70,0}, {70,0}};
 
 //Thread Priority
-static enum mainProcessPrio {captureCutImagePrio = 2, plateRecognitionPrio, textRecognitionPrio, updatePlatePrio, plateValidationPrio};
+enum mainProcessPrio {captureCutImagePrio = 2, plateRecognitionPrio, textRecognitionPrio, updatePlatePrio, plateValidationPrio};
 
 //Threads Functions Prototypes
 void *t_captureCutImage(void *arg);
@@ -172,7 +179,7 @@ int main(int count, char *args[])
         exit(-1);
     }
 
-    if((PIGATE_ID = mmap(0, PIGATELEN, PROT_WRITE|PROT_READ, MAP_SHARED,shmPIgateID,0)) == (caddr_t) -1) 
+    if((PIGATE_ID = (char*)mmap(0, PIGATELEN, PROT_WRITE|PROT_READ, MAP_SHARED,shmPIgateID,0)) == (caddr_t) -1) 
     {
         perror("PIgateID mmap failure");
         exit(-1);
@@ -180,6 +187,11 @@ int main(int count, char *args[])
 
     strcpy(PIGATE_ID,PIgate_ID);
 
+    //Create Fifos
+
+    // mkfifo(FIFO1,READWRITE_PERMISSION);
+    // mkfifo(FIFO2,READWRITE_PERMISSION);
+    fifoString_init(&textFifo,plateText,plateTextLen);
 
     //Adding Devices Drivers
 
@@ -283,10 +295,19 @@ void *t_textRecognition(void *arg)
 {
     printf("I detect the plate's text! \n");
 
+    sleep(1);
+
     while (1)
     {
-        sleep(5);
         
+        fifoString_push(&textFifo,"AA0002");
+
+        sleep(30);
+
+        fifoString_push(&textFifo,"XX98FD");
+        
+        sleep(30);
+
     }
     
 
@@ -332,13 +353,16 @@ void *t_updatePlate(void *arg)
 void *t_plateValidation(void *arg)
 {
 
+    char foundedPlate[PLATESSIZE];
     close(entriesDBPIPE[0]); // Close reading end
     bool whitelistPlate = false; 
 
-    const char foundedPlate[] = "AA0002";
-
     while (1)
     {
+
+        while (fifoString_pop(&textFifo,foundedPlate) == -ENODATA)
+        { /*Waiting for need plates*/ }
+        
 
         pthread_mutex_lock(&updatePlatesMutex);
 
@@ -366,7 +390,7 @@ void *t_plateValidation(void *arg)
             ledRGBStatus(denied);
         }
         
-        sleep(60);
+        sleep(20);
 
     }
     
