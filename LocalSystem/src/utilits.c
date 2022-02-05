@@ -17,6 +17,8 @@
 
 #include "../inc/utilits.h"
 
+int entriesDBPIPE[2];
+int recPlatePIPE[2];
 
 void setupThread(int priority, pthread_attr_t *pthread_attr, struct sched_param *pthread_param)
 {
@@ -90,3 +92,7 @@ void insertPlateHiffen(char* buffer, int len)
     strcpy(buffer,auxBuffer);
 }
 
+void installPyrebase(void)
+{
+    system("pip3 install pyrebase4");
+}

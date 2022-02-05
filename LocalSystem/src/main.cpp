@@ -23,7 +23,7 @@
 #include <string.h>
 #include <stdbool.h>
 #include <fcntl.h> /* For O_* constants */  
-#include <stdint.h>    
+#include <stdint.h>
 
 extern "C" {
 #include"../inc/utilits.h"
@@ -31,8 +31,21 @@ extern "C" {
 #include "../inc/firebase.h"
 #include "../inc/ledRGB.h"
 #include "../inc/relay.h"
-#include "../inc/fifo.h"
+
 }
+
+#include "/home/hugo/Downloads/buildroot-2021.02.5/output/host/arm-buildroot-linux-gnueabihf/sysroot/usr/include/opencv2/opencv.hpp"
+// #include "/home/hugo/Downloads/buildroot-2021.02.5/output/host/arm-buildroot-linux-gnueabihf/sysroot/usr/include/opencv2/objdetect.hpp"
+// #include "/home/hugo/Downloads/buildroot-2021.02.5/output/host/arm-buildroot-linux-gnueabihf/sysroot/usr/include/opencv2/highgui.hpp"
+// #include "/home/hugo/Downloads/buildroot-2021.02.5/output/host/arm-buildroot-linux-gnueabihf/sysroot/usr/include/opencv2/imgproc.hpp"
+// #include "/home/hugo/Downloads/buildroot-2021.02.5/output/host/arm-buildroot-linux-gnueabihf/sysroot/usr/include/opencv2/videoio.hpp"
+// #include "/home/hugo/Downloads/buildroot-2021.02.5/output/host/arm-buildroot-linux-gnueabihf/sysroot/usr/include/opencv2/core.hpp"
+#include "../inc/fifo.hpp"
+
+#include <iostream>
+
+using namespace std;
+using namespace cv;
 
 
 //Daemons PID
@@ -126,9 +139,10 @@ int main(int count, char *args[])
     
     char PIgate_ID[PIGATELEN] = {'\0'};
     uint32_t shmMode;
-    
     //Check if PIgate exists
     int fdPIgateID = open("/etc/PIgate/PIgateID.txt", O_RDONLY);
+
+    installPyrebase();
 
     if(fdPIgateID == -1)
     {
@@ -265,6 +279,7 @@ void *t_captureCutImage(void *arg)
     
     printf("I took a photo! \n");
     
+
     while (1)
     {
         

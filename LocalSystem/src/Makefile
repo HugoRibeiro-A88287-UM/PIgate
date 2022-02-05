@@ -1,6 +1,6 @@
 CCRASP = arm-buildroot-linux-gnueabihf-gcc
 CFLAGS = -g -I. 
-DEPS = -pthread -lrt -lpython3.9 -lstdc++
+DEPS = -pthread -lrt -lpython3.9 -lstdc++  -lopencv_core -lopencv_highgui -lopencv_imgproc
 
 CSRCFLODER=$(wildcard *.c)
 CPPSRCFLODER=$(wildcard *.cpp)

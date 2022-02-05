@@ -25,14 +25,13 @@
 #define SHM_PIGATEID_NAME "shm_PIgateID"
 #define FIFO1 "/tmp/imagesFifo"
 #define FIFO2 "/tmp/platesFifo"
-#define FIFO3 "/tmp/textFifo"
 
 /**
  * @brief PIPE array's defenition
  * 
  */
-int entriesDBPIPE[2];
-int recPlatePIPE[2];
+extern int entriesDBPIPE[2];
+extern int recPlatePIPE[2];
 
 
 /**
@@ -77,6 +76,13 @@ void removeHiffen(char* buffer, int len);
  * 
  */
 void insertPlateHiffen(char* buffer, int len);
+
+
+/**
+ * @brief Install the remaining pyrebase packages 
+ * 
+ */
+void installPyrebase(void);
 
 
 #endif //UTILITS_H
