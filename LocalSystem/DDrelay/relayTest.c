@@ -36,7 +36,7 @@ int main(void)
     int fd0 = open("/dev/relay0", O_RDWR);
     char ledOn = '1';
     char ledOff = '0';
-    relayStatus_t pBuff;
+    int pBuff;
 
 
     printf("\n Testing Output relay (2 times): \n");

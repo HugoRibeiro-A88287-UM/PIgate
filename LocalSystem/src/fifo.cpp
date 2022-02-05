@@ -155,7 +155,7 @@ void clear_fifo32(fifo32_t *fifo)
 	fifo->readIndex = fifo->writeIndex;
 }
 
-int fifoString_init(fifoString_t *fifo, arrayString* array, uint32_t len)
+int fifoString_init(fifoString_t *fifo, arrayString* array, uint16_t len)
 {
 	//Checks if array is NULL
 	if(array == NULL)
@@ -168,7 +168,7 @@ int fifoString_init(fifoString_t *fifo, arrayString* array, uint32_t len)
 	
     return EXIT_SUCCESS;
 }
-int fifoPhoto_init(fifoPhoto_t *fifo, Mat* array, uint32_t len)
+int fifoPhoto_init(fifoPhoto_t *fifo, Mat* array, uint16_t len)
 {
 	//Checks if array is NULL
 	if(array == NULL)
@@ -265,7 +265,7 @@ void clear_fifoString(fifoString_t *fifo)
 	fifo->readIndex = fifo->writeIndex;
 }
 
-void clear_fifoString(fifoPhoto_t *fifo)
+void clear_fifoPhoto(fifoPhoto_t *fifo)
 {
 	fifo->readIndex = fifo->writeIndex;
 }

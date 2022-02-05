@@ -78,6 +78,8 @@ int openGate(void)
 
 int getGateStatus(void)
 {
+    char pbuff;
+
     if(isRelayModuleActive == ON)
     {
         int fd0 = open("/dev/relay0", O_RDONLY);
@@ -87,12 +89,17 @@ int getGateStatus(void)
             return -EXIT_FAILURE;
         }   
 
-        if( read(fd0,&gateStatus,1) != 1)
+        if( read(fd0, &pbuff,1) != 1)
         {
             printf("Failure Open: Write Operation in Relay Device Driver \n");
             return -EXIT_FAILURE;
         }
         close(fd0);
+
+        if(pbuff == '0')
+            gateStatus = gateClose;
+        else
+            gateStatus = gateOpen;
 
         return gateStatus;
         

@@ -72,9 +72,9 @@ typedef struct serialFifo32
  */
 typedef struct serialFifoString
 {
-    uint32_t writeIndex;
-    uint32_t readIndex;
-	uint32_t buff_len;
+    uint16_t writeIndex;
+    uint16_t readIndex;
+	uint16_t buff_len;
     arrayString* p_buff;
 
 }fifoString_t;
@@ -86,9 +86,9 @@ typedef struct serialFifoString
  */
 typedef struct serialFifoPhoto
 {
-    uint32_t writeIndex;
-    uint32_t readIndex;
-	uint32_t buff_len;
+    uint16_t writeIndex;
+    uint16_t readIndex;
+	uint16_t buff_len;
     cv::Mat* p_buff;
 
 }fifoPhoto_t;
@@ -101,15 +101,15 @@ typedef struct serialFifoPhoto
  * 
  * @param fifo Specifics the fifo
  * @param array Pointer to a buffer that fifo can storage info
- * @param len Buffer length
+ * @param len Buffer length. Must be iqual to base two
  * @return  Return EXIT_SUCESS if all went well, or ENODATA
  *						if an error occurs
  */
 char fifo8_init(fifo8_t *fifo, char *array, uint8_t len);
 char fifo16_init(fifo16_t *fifo, uint16_t *array, uint16_t len);
 char fifo32_init(fifo32_t *fifo, uint32_t *array, uint16_t len);
-int fifoString_init(fifoString_t *fifo, arrayString* array, uint32_t len);
-int fifoPhoto_init(fifoPhoto_t *fifo, cv::Mat* array, uint32_t len);
+int fifoString_init(fifoString_t *fifo, arrayString* array, uint16_t len);
+int fifoPhoto_init(fifoPhoto_t *fifo, cv::Mat* array, uint16_t len);
 
 
 /**
@@ -133,7 +133,6 @@ int fifoPhoto_push(fifoPhoto_t *fifo,cv::Mat data);
  * @param return Where the string will be return
  * @return return one position of the buffer or 
  *      If the fifo is empty return -ENODATA
- *      Otherwise error -EXIT_FAILURE
  */
 int fifo8_pop(fifo8_t *fifo);
 int32_t fifo16_pop(fifo16_t *fifo);
@@ -162,7 +161,7 @@ void clear_fifo8(fifo8_t *fifo);
 void clear_fifo16(fifo16_t *fifo);
 void clear_fifo32(fifo32_t *fifo);
 void clear_fifoString(fifoString_t *fifo);
-void clear_fifoString(fifoPhoto_t *fifo);
+void clear_fifoPhoto(fifoPhoto_t *fifo);
 
 #endif
 

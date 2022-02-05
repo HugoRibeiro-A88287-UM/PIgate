@@ -21,10 +21,9 @@
 #define MAXPLATELENDIGITS 4
 #define PLATESSIZE 8
 #define PIGATELEN 8
+#define FIFOLEN 4
 #define READWRITE_PERMISSION 0666
 #define SHM_PIGATEID_NAME "shm_PIgateID"
-#define FIFO1 "/tmp/imagesFifo"
-#define FIFO2 "/tmp/platesFifo"
 
 /**
  * @brief PIPE array's defenition

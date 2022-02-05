@@ -60,9 +60,18 @@ char whitelistPlates[MAXPLATESLEN][PLATESSIZE];
 int PLATESLEN = 0;
 pthread_mutex_t updatePlatesMutex = PTHREAD_MUTEX_INITIALIZER; // Mutex for whitelistPlates buffer
 
-//Fifo3 Variavels
-const int plateTextLen = 4;
-arrayString plateText[4];
+//FIFO1 Variables
+Mat images[FIFOLEN];
+fifoPhoto_t imagesFifo;
+
+
+//FIFO2 Variables
+Mat plates[FIFOLEN];
+fifoPhoto_t platesFifo;
+
+
+//FIFO3 Variabels
+arrayString plateText[FIFOLEN];
 fifoString_t textFifo;
 
 //SIGALRM EACH 1 MINUTE and 10 Seconds
@@ -201,25 +210,6 @@ int main(int count, char *args[])
 
     strcpy(PIGATE_ID,PIgate_ID);
 
-    //Create Fifos
-
-    // mkfifo(FIFO1,READWRITE_PERMISSION);
-    // mkfifo(FIFO2,READWRITE_PERMISSION);
-    fifoString_init(&textFifo,plateText,plateTextLen);
-
-    //Adding Devices Drivers
-
-    if( initLedRGB() || initRelay() )
-    {
-        remLedRGB();
-        remRelay();
-        perror("Error trying to insert Device Drivers \n");
-        exit(-1);
-    }
-
-    ledRGBStatus(idle);
-
-
     //Daemons Creation
 
     daemonEntriesDB = initDaemonEntriesDB();
@@ -233,6 +223,22 @@ int main(int count, char *args[])
     signal(SIGALRM, signalHandler);
     setitimer (ITIMER_REAL, &itv, NULL);
 
+    //Adding Devices Drivers
+
+    if( initLedRGB() || initRelay() )
+    {
+        remLedRGB();
+        remRelay();
+        perror("Error trying to insert Device Drivers \n");
+        exit(-1);
+    }
+
+    ledRGBStatus(idle);
+
+    //Create Fifos
+    fifoPhoto_init(&imagesFifo,images,FIFOLEN);
+    fifoPhoto_init(&platesFifo,plates,FIFOLEN);
+    fifoString_init(&textFifo,plateText,FIFOLEN);
 
     /*Threads Creation*/
 
@@ -276,30 +282,110 @@ int main(int count, char *args[])
 
 void *t_captureCutImage(void *arg)
 {
-    
-    printf("I took a photo! \n");
-    
+    int gateStatus;
+    Mat imageCapture(2,2,CV_8UC3, Scalar(0,0,255));
+
+    printf("t_captureCutImage Thread is Ready \n");
 
     while (1)
     {
-        
-        sleep(16);
-        
-        system("ps -A |grep ./PIgateProgram");
+        sleep(1);
+
+        gateStatus = getGateStatus();
+
+        printf("Gate Status: %d \n", gateStatus);
+
+        switch (gateStatus)
+        {
+            case gateOpen:
+                /*Do Nothing*/
+                break;
+
+            case -EXIT_FAILURE:
+                ledRGBStatus(warning);
+                break;
+
+            case gateClose:
+
+                if(get_FifoPhotoBuffSize(imagesFifo) == FIFOLEN)
+                {
+                    /*Ignore, FIFO is FULL*/
+                }
+                else
+                {
+                    //IMAGE CAPTURE AND CROP
+
+                    fifoPhoto_push(&imagesFifo,imageCapture);
+                }
+
+                break;
+
+            default:
+                /*FATAL ERROR*/
+                printf("Error Getting gateStatus in t_captureCutImage \n");
+                kill(getpid(),SIGTERM);
+                break;
+        }
+
+        sleep(10);
 
     }
     
-
+    // system("ps -A |grep ./PIgateProgram");
 }
 
 void *t_plateRecognition(void *arg)
 {
+    int gateStatus;
+    Mat receivedImage;
+    Mat plateImage;
 
-    printf("OMG! There is a plate \n");
+    printf("t_plateRecognition is ready \n");
 
     while (1)
     {
-        sleep(5);
+        
+        while(fifoPhoto_pop(&imagesFifo,&receivedImage) == -ENODATA )
+        { /*Waits for an image*/
+            sleep(1);
+        }
+        
+        gateStatus = getGateStatus();
+
+        switch (gateStatus)
+        {
+            case gateOpen:
+                /*Clears the FIFO since the gate is already open*/
+                clear_fifoPhoto(&imagesFifo);
+                break;
+
+            case -EXIT_FAILURE:
+                ledRGBStatus(warning);
+                break;
+
+            case gateClose:
+
+                if(get_FifoPhotoBuffSize(platesFifo) == FIFOLEN)
+                {
+                    /*Ignore, FIFO is FULL*/
+                }
+                else
+                {
+                    //DETECT THE PLATE FUNCTION
+
+                    //fifoPhoto_push(&platesFifo,plateImage);
+                    cout << receivedImage << endl;
+                    fifoPhoto_push(&platesFifo,receivedImage);
+                }
+
+                break;
+
+            default:
+                /*FATAL ERROR*/
+                printf("Error Getting gateStatus in t_plateRecognition \n");
+                kill(getpid(),SIGTERM);
+                break;
+        }
         
     }
     
@@ -308,21 +394,57 @@ void *t_plateRecognition(void *arg)
 
 void *t_textRecognition(void *arg)
 {
-    printf("I detect the plate's text! \n");
+    int gateStatus;
+    Mat receivedPlate;
+    arrayString plateString;
 
-    sleep(1);
+    printf("t_textRecognition is ready! \n");
 
     while (1)
     {
         
-        fifoString_push(&textFifo,"AA0002");
-
-        sleep(30);
-
-        fifoString_push(&textFifo,"XX98FD");
+        while(fifoPhoto_pop(&platesFifo,&receivedPlate) == -ENODATA )
+        { /*Waits for an image*/
+            sleep(1);
+        }
         
-        sleep(30);
+        gateStatus = getGateStatus();
 
+        switch (gateStatus)
+        {
+            case gateOpen:
+                /*Clears the FIFO since the gate is already open*/
+                clear_fifoPhoto(&platesFifo);
+                break;
+
+            case -EXIT_FAILURE:
+                ledRGBStatus(warning);
+                break;
+
+            case gateClose:
+
+                if(get_FifoStringBuffSize(textFifo) == FIFOLEN)
+                {
+                    /*Ignore, FIFO is FULL*/
+                }
+                else
+                {
+                    //DETECT THE TEXT FUNCTION
+
+                    // fifoString_push(&textFifo,plateString);
+                    cout << receivedPlate << endl;
+                     fifoString_push(&textFifo,"AA0001");
+                }
+
+                break;
+
+            default:
+                /*FATAL ERROR*/
+                printf("Error Getting gateStatus in t_textRecognition \n");
+                kill(getpid(),SIGTERM);
+                break;
+        }
+        
     }
     
 
@@ -331,8 +453,12 @@ void *t_textRecognition(void *arg)
 void *t_updatePlate(void *arg)
 {
     char inBuff[PLATESSIZE];
-
     close(recPlatePIPE[1]); // Close writing end 
+
+    printf("t_updatePlate is ready! \n");
+
+    //Little Delay
+    sleep(1);
 
     while (1)
     {
@@ -372,6 +498,8 @@ void *t_plateValidation(void *arg)
     close(entriesDBPIPE[0]); // Close reading end
     bool whitelistPlate = false; 
 
+    printf("t_plateValidation is ready! \n");
+
     while (1)
     {
 
@@ -396,6 +524,7 @@ void *t_plateValidation(void *arg)
             whitelistPlate = false;
 
             printf(" GOOD PLATE \n ");
+            clear_fifoString(&textFifo);
             ledRGBStatus(allow);
             openGate();
         }
