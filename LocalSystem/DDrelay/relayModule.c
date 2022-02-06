@@ -199,6 +199,8 @@ static int __init relayModule_init(void) {
 	SetGPIOFunction(s_pGpioRegisters, relayInput , GPIO_INPUT); 		
 	SetGPIOFunction(s_pGpioRegisters, relayOutput, GPIO_OUTPUT);
 
+	s_pGpioRegisters->GPSET[relayOutput / 32] = (1 << (relayOutput % 32));
+
 	printk("Success: Relay initialization"); 	
 
 	return 0;

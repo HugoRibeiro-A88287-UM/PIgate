@@ -32,7 +32,7 @@ int initRelay(void)
         return EXIT_SUCCESS;
     }
 
-    return -EXIT_FAILURE;
+        return -EXIT_FAILURE;
     
 }
 

@@ -155,7 +155,7 @@ int main(int count, char *args[])
     }
 
     
-    read(fdPIgateID,PIgate_ID, PIGATELEN);  
+    read(fdPIgateID,PIgate_ID, PIGATELEN-1);  
     close(fdPIgateID);
     
     if( validPIgate(PIgate_ID) == -EXIT_FAILURE)

@@ -151,7 +151,7 @@ static void updatePlates(void)
 
         }
 
-        sleep(60);
+        sleep(30);
 
     }
 }
