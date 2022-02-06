@@ -155,7 +155,7 @@ int main(int count, char *args[])
     }
 
     
-    read(fdPIgateID,PIgate_ID, 1);  
+    read(fdPIgateID,PIgate_ID, PIGATELEN);  
     close(fdPIgateID);
     
     if( validPIgate(PIgate_ID) == -EXIT_FAILURE)
@@ -543,8 +543,12 @@ void *t_plateValidation(void *arg)
         else
         {
             printf(" BAD PLATE \n ");
+            setitimer (ITIMER_REAL, &itv, NULL); //Reset SIGALARM timer
             ledRGBStatus(denied);
         }
+
+        //clean withlistPlate flag
+        whitelistPlate = false;
         
         sleep(1);
 

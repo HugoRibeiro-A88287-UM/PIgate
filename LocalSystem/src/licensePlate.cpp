@@ -12,7 +12,6 @@
 #include "fcntl.h"
 #include "unistd.h"
 #include <iostream>
-
 #include <string>
 
 
@@ -24,6 +23,7 @@ CascadeClassifier plate_cascade;
 
 int init_cascade()
 {
+    //Get the license plate cascade name 
     string license_plate_cascade_name = "/usr/share/OpenCV/haarcascades/cascade.xml"; 
     if( !plate_cascade.load( license_plate_cascade_name ) )
     {
@@ -37,9 +37,9 @@ int init_cascade()
 
 Mat take_picture()
 {
-    //cout << "taking picture" << endl;
+    //imread funtion take a photo with the selected device
     Mat frame = imread(CAMERA);
-    //cout << "picture taken" << endl;
+ 
     return frame;
 }
 
@@ -48,17 +48,18 @@ Mat take_picture()
 int detectPlate( Mat frame, int len )
 {
     Mat frame_gray;
+    std::vector<Rect> license_plates;
 
-    //cout << "detecting ... " << endl;
     /*turns image into gray scale*/
     cvtColor( frame, frame_gray, COLOR_BGR2GRAY );
     equalizeHist( frame_gray, frame_gray );
 
-    std::vector<Rect> license_plates;
+    
     /*finds all license plates on the image, stores coordinates in cv::Rect vector */
     plate_cascade.detectMultiScale( frame_gray, license_plates );
     string plate;
     
+    //If Plate not found
     if(license_plates.size() == 0)
         return -EXIT_FAILURE;
 
@@ -70,14 +71,13 @@ int detectPlate( Mat frame, int len )
         Point corner_4(license_plates[i].x + license_plates[i].width, license_plates[i].y + license_plates[i].height);
         rectangle(frame, corner_1, corner_4, Scalar( 255, 0, 255 ), 1, LINE_8, 0);
         Mat plate_pic = frame_gray( license_plates[i] );
+
         //create a .jpg file of the croped license plate
         string imageName = "/etc/pic" + to_string(len) + ".jpg";
 
         imwrite(imageName.c_str(), plate_pic);
 
     }
-    //write full image with rectangle around the license plate
-    //imwrite("/etc/hello.jpg", frame); //Output detected plate
    
    return len;
 }
@@ -96,6 +96,7 @@ string read_license_plates(uint16_t plate)
     --config file contains pattern information, whitelisted characters and blacklisted characters */
     string callTerminal = "tesseract /etc/pic" + to_string(plate) + ".jpg output --psm 8 --oem 2 --dpi 300 /etc/PIgate/config";
     system(callTerminal.c_str());
+
     //read tesseract output from file
     int fd0 = open("output.txt", O_RDONLY);
      if(fd0 == -1)
@@ -105,6 +106,7 @@ string read_license_plates(uint16_t plate)
     }
     read(fd0,text_plate, 7);
     close(fd0);
+    
     //convert to string
     plate_leters = text_plate;
         //remove first recognized character, corresponds to the country indication on the plate, 6 is the usefull number of characters in a PT license plate

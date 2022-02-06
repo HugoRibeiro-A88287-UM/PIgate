@@ -35,6 +35,7 @@ int init_cascade();
  * @brief Takes a picture from the camera
  * 
  * @returns picture in CV::Mat structure
+ *          NULL in case of Error
  */
 Mat take_picture();
 
