@@ -34,12 +34,7 @@ extern "C" {
 
 }
 
-#include "/home/hugo/Downloads/buildroot-2021.02.5/output/host/arm-buildroot-linux-gnueabihf/sysroot/usr/include/opencv2/opencv.hpp"
-// #include "/home/hugo/Downloads/buildroot-2021.02.5/output/host/arm-buildroot-linux-gnueabihf/sysroot/usr/include/opencv2/objdetect.hpp"
-// #include "/home/hugo/Downloads/buildroot-2021.02.5/output/host/arm-buildroot-linux-gnueabihf/sysroot/usr/include/opencv2/highgui.hpp"
-// #include "/home/hugo/Downloads/buildroot-2021.02.5/output/host/arm-buildroot-linux-gnueabihf/sysroot/usr/include/opencv2/imgproc.hpp"
-// #include "/home/hugo/Downloads/buildroot-2021.02.5/output/host/arm-buildroot-linux-gnueabihf/sysroot/usr/include/opencv2/videoio.hpp"
-// #include "/home/hugo/Downloads/buildroot-2021.02.5/output/host/arm-buildroot-linux-gnueabihf/sysroot/usr/include/opencv2/core.hpp"
+#include "../inc/licensePlate.hpp"
 #include "../inc/fifo.hpp"
 
 #include <iostream>
@@ -66,16 +61,16 @@ fifoPhoto_t imagesFifo;
 
 
 //FIFO2 Variables
-Mat plates[FIFOLEN];
-fifoPhoto_t platesFifo;
+uint16_t plates[FIFOLEN];
+fifo16_t platesFifo;
 
 
 //FIFO3 Variabels
 arrayString plateText[FIFOLEN];
 fifoString_t textFifo;
 
-//SIGALRM EACH 1 MINUTE and 10 Seconds
-struct itimerval itv = {{70,0}, {70,0}};
+//SIGALRM EACH 30 Seconds
+struct itimerval itv = {{30,0}, {30,0}};
 
 //Thread Priority
 enum mainProcessPrio {captureCutImagePrio = 2, plateRecognitionPrio, textRecognitionPrio, updatePlatePrio, plateValidationPrio};
@@ -237,8 +232,10 @@ int main(int count, char *args[])
 
     //Create Fifos
     fifoPhoto_init(&imagesFifo,images,FIFOLEN);
-    fifoPhoto_init(&platesFifo,plates,FIFOLEN);
+    fifo16_init(&platesFifo,plates,FIFOLEN);
     fifoString_init(&textFifo,plateText,FIFOLEN);
+
+    init_cascade();
 
     /*Threads Creation*/
 
@@ -293,8 +290,6 @@ void *t_captureCutImage(void *arg)
 
         gateStatus = getGateStatus();
 
-        printf("Gate Status: %d \n", gateStatus);
-
         switch (gateStatus)
         {
             case gateOpen:
@@ -313,7 +308,9 @@ void *t_captureCutImage(void *arg)
                 }
                 else
                 {
-                    //IMAGE CAPTURE AND CROP
+                    imageCapture = take_picture();
+
+                    cout << "Pushing Image" << endl;
 
                     fifoPhoto_push(&imagesFifo,imageCapture);
                 }
@@ -331,12 +328,13 @@ void *t_captureCutImage(void *arg)
 
     }
     
-    // system("ps -A |grep ./PIgateProgram");
+
 }
 
 void *t_plateRecognition(void *arg)
 {
     int gateStatus;
+    int detectPlateReturn;
     Mat receivedImage;
     Mat plateImage;
 
@@ -365,17 +363,25 @@ void *t_plateRecognition(void *arg)
 
             case gateClose:
 
-                if(get_FifoPhotoBuffSize(platesFifo) == FIFOLEN)
+                if(get_Fifo16BuffSize(platesFifo) == FIFOLEN)
                 {
                     /*Ignore, FIFO is FULL*/
                 }
                 else
                 {
-                    //DETECT THE PLATE FUNCTION
+                    detectPlateReturn = detectPlate(receivedImage, (platesFifo.writeIndex & (platesFifo.buff_len-1) ) );
 
-                    //fifoPhoto_push(&platesFifo,plateImage);
-                    cout << receivedImage << endl;
-                    fifoPhoto_push(&platesFifo,receivedImage);
+                    if(detectPlateReturn == -EXIT_FAILURE)
+                    {
+                        /*ERROR, PLATE NOT FOUNDED*/
+                    }
+                    else
+                    {   
+                        cout << "Pushing index photo" << endl;
+
+                        fifo16_push(&platesFifo,detectPlateReturn);
+                    }
+
                 }
 
                 break;
@@ -395,15 +401,15 @@ void *t_plateRecognition(void *arg)
 void *t_textRecognition(void *arg)
 {
     int gateStatus;
-    Mat receivedPlate;
-    arrayString plateString;
+    int16_t receivedPlate;
+    string plateString;
 
     printf("t_textRecognition is ready! \n");
 
     while (1)
     {
         
-        while(fifoPhoto_pop(&platesFifo,&receivedPlate) == -ENODATA )
+        while( (receivedPlate = fifo16_pop(&platesFifo) ) == -ENODATA )
         { /*Waits for an image*/
             sleep(1);
         }
@@ -414,7 +420,7 @@ void *t_textRecognition(void *arg)
         {
             case gateOpen:
                 /*Clears the FIFO since the gate is already open*/
-                clear_fifoPhoto(&platesFifo);
+                clear_fifo16(&platesFifo);
                 break;
 
             case -EXIT_FAILURE:
@@ -429,11 +435,18 @@ void *t_textRecognition(void *arg)
                 }
                 else
                 {
-                    //DETECT THE TEXT FUNCTION
+                   
+                    plateString = read_license_plates(receivedPlate);
 
-                    // fifoString_push(&textFifo,plateString);
-                    cout << receivedPlate << endl;
-                     fifoString_push(&textFifo,"AA0001");
+                    if(plateString == "ERROR")
+                    {
+                        /*Plate String not founded*/
+                    }
+                    else
+                    {
+                        cout << "Pushing text string" << plateString << endl;
+                        fifoString_push(&textFifo,plateString.c_str());
+                    }
                 }
 
                 break;
@@ -458,7 +471,7 @@ void *t_updatePlate(void *arg)
     printf("t_updatePlate is ready! \n");
 
     //Little Delay
-    sleep(1);
+    sleep(2);
 
     while (1)
     {
@@ -521,9 +534,8 @@ void *t_plateValidation(void *arg)
 
             write(entriesDBPIPE[1], foundedPlate, strlen(foundedPlate));
 
-            whitelistPlate = false;
-
             printf(" GOOD PLATE \n ");
+            setitimer (ITIMER_REAL, &itv, NULL); //Reset SIGALARM timer
             clear_fifoString(&textFifo);
             ledRGBStatus(allow);
             openGate();
@@ -534,7 +546,7 @@ void *t_plateValidation(void *arg)
             ledRGBStatus(denied);
         }
         
-        sleep(20);
+        sleep(1);
 
     }
     

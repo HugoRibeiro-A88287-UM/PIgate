@@ -1,0 +1,3 @@
+tessedit_char_whitelist 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ
+tessedit_char_blacklist -+*-!"#$%&/()=? 
+user_patterns_suffix mypatterns

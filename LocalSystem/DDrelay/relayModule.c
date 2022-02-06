@@ -114,7 +114,7 @@ ssize_t relay_device_write(struct file *pfile, const char __user *pbuff, size_t 
 
 	pr_alert("%s: register value is 0x%x\n",__FUNCTION__,(1<<(relayOutput %32)));
 			 
-	if (pbuff[0]=='C')
+	if (pbuff[0]=='O')
 		s_pGpioRegisters->GPCLR[relayOutput / 32] = (1 << (relayOutput % 32));
 	else
 		s_pGpioRegisters->GPSET[relayOutput / 32] = (1 << (relayOutput % 32));

@@ -34,8 +34,8 @@ int main(void)
     sleep(3);
 
     int fd0 = open("/dev/relay0", O_RDWR);
-    char ledOn = '1';
-    char ledOff = '0';
+    char ledOn = 'O';
+    char ledOff = 'C';
     int pBuff;
 
 

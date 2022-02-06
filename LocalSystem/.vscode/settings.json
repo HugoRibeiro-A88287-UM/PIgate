@@ -14,7 +14,10 @@
         "cstdio": "c",
         "string_view": "c",
         "functional": "c",
-        "pthread.h": "c"
+        "pthread.h": "c",
+        "array": "cpp",
+        "initializer_list": "cpp",
+        "utility": "cpp"
     },
     "C_Cpp.errorSquiggles": "Disabled"
 }
