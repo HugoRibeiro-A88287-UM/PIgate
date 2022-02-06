@@ -16,12 +16,7 @@ Note: By adding all the packages, the ROOT file system storage couldn't be enoug
 
 -> System Configuration
 
-	dev management = devtmpfs + eudev
-	run a getty (login prompt) after boot
-		TTY port = ttyAMA0
-		baudrate = 115200 
-		
-	    
+	    dev management = devtmpfs + eudev
 
 -> Target packages
 
@@ -92,8 +87,12 @@ Note: By adding all the packages, the ROOT file system storage couldn't be enoug
             -Enable autoscan
             -Install wpa_cli binary                                                  
             -Install wpa_client shared library                                        
-            -Install wpa_passphrase binary 
-  
+            -Install wpa_passphrase binary
+
+  -> Graphic libraries and applications (graphic/text)
+       
+        tesseract-ocr (English)
+
   -> Hardware Handling
 
   	Firmware
@@ -105,7 +104,8 @@ Note: By adding all the packages, the ROOT file system storage couldn't be enoug
   -> Libraries
 
 			 Graphics
-				jpeg support (variant jpeg)	
+				jpeg support (variant jpeg)
+                opencv3	all except the build tests
 			 Hardware Handling
 				bcm2835
 				libv4l + utils tools
@@ -165,6 +165,12 @@ Then add the following line in post-build.sh
 
 After it, add interfaces, inittab and wpa_supplicant files in board/raspberrypi4 directory, with the proper configurations.
 
+## Init Script
+
+To initializate the program in boot time, the script that is present in board/raspberrypi4 folder
+must go to the init.d folder. So to automatically do that, inset the following line in the post-build.sh
+
+    cp board/raspberrypi4/S70InitPIgate.sh ${TARGET_DIR}/etc/init.d/S70InitPIgate
 ## Authors
 
 - [@HugoRibeiro](https://github.com/HugoRibeiro-A88287-UM/)

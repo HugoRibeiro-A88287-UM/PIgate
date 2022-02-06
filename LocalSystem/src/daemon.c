@@ -151,7 +151,7 @@ static void updatePlates(void)
 
         }
 
-        sleep(30);
+        sleep(60);
 
     }
 }
@@ -173,7 +173,7 @@ static void openGateDB(void)
     
     while (1)
     {
-        sleep(15);
+        sleep(1);
 
         gate = isToOpen(PIGATE_ID);
 

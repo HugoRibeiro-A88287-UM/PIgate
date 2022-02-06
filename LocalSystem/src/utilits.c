@@ -91,8 +91,3 @@ void insertPlateHiffen(char* buffer, int len)
     //Copy the new buffer
     strcpy(buffer,auxBuffer);
 }
-
-void installPyrebase(void)
-{
-    system("pip3 install pyrebase4");
-}

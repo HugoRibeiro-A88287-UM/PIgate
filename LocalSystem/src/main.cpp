@@ -146,8 +146,6 @@ int main(int count, char *args[])
     //Check if PIgate exists
     int fdPIgateID = open("/etc/PIgate/PIgateID.txt", O_RDONLY);
 
-    installPyrebase();
-
     if(fdPIgateID == -1)
     {
         perror("Cannot Open PIGateID.txt \n");
@@ -286,7 +284,7 @@ void *t_captureCutImage(void *arg)
 
     while (1)
     {
-        sleep(1);
+        sleep(5);
 
         gateStatus = getGateStatus();
 
@@ -324,7 +322,7 @@ void *t_captureCutImage(void *arg)
                 break;
         }
 
-        sleep(10);
+        //sleep(10);
 
     }
     
@@ -392,6 +390,8 @@ void *t_plateRecognition(void *arg)
                 kill(getpid(),SIGTERM);
                 break;
         }
+
+        sleep(1);
         
     }
     
@@ -457,6 +457,8 @@ void *t_textRecognition(void *arg)
                 kill(getpid(),SIGTERM);
                 break;
         }
+
+        sleep(1);
         
     }
     
@@ -469,9 +471,6 @@ void *t_updatePlate(void *arg)
     close(recPlatePIPE[1]); // Close writing end 
 
     printf("t_updatePlate is ready! \n");
-
-    //Little Delay
-    sleep(2);
 
     while (1)
     {

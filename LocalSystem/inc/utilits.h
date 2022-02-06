@@ -77,11 +77,5 @@ void removeHiffen(char* buffer, int len);
 void insertPlateHiffen(char* buffer, int len);
 
 
-/**
- * @brief Install the remaining pyrebase packages 
- * 
- */
-void installPyrebase(void);
-
 
 #endif //UTILITS_H
